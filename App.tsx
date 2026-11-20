@@ -1,10 +1,10 @@
-import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { initializeAds } from './src/ads';
+import { ImmersiveSystemUI } from './src/ImmersiveSystemUI';
 import { AppNavigator } from './src/navigation';
 import { SettingsProvider, useSettings } from './src/SettingsContext';
 import { colors } from './src/theme';
@@ -27,7 +27,7 @@ function Root() {
 
   return (
     <>
-      <StatusBar style="light" />
+      <ImmersiveSystemUI />
       <AppNavigator />
     </>
   );

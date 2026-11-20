@@ -7,6 +7,11 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "scheme": "visual-ruler",
+    "androidStatusBar": {
+      "hidden": true,
+      "translucent": true,
+      "backgroundColor": "#00000000"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.visualruler.app",
@@ -47,7 +52,16 @@
           "microphonePermission": false,
           "recordAudioAndroid": false
         }
-      ]
+      ],
+      [
+        "expo-navigation-bar",
+        {
+          "hidden": true,
+          "style": "dark",
+          "enforceContrast": false
+        }
+      ],
+      "expo-system-ui"
     ]
   }
 }

@@ -196,7 +196,8 @@ export function MeasureScreen() {
   useEffect(() => () => stopHold(), []);
 
   const readout = formatMeasurement(displayMm, unit);
-  const bottomPad = Math.max(insets.bottom, 4);
+  // Immersive mode hides system bars — keep a tiny pad only if insets remain.
+  const bottomPad = Math.max(insets.bottom > 24 ? 0 : insets.bottom, 0);
 
   return (
     <View style={styles.root}>
@@ -247,7 +248,7 @@ export function MeasureScreen() {
         </GestureDetector>
 
         <View
-          style={[styles.chrome, { paddingTop: Math.max(insets.top, 8) }]}
+          style={[styles.chrome, { paddingTop: spacing.sm }]}
           pointerEvents="box-none"
         >
           <Pressable
