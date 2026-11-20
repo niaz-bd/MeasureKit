@@ -18,6 +18,7 @@ export type FeatureRoute = keyof RootStackParamList;
 export type FeatureId =
   | 'ruler'
   | 'calculator'
+  | 'unitConverter'
   | 'ar'
   | 'level'
   | 'inclinometer'
@@ -82,6 +83,14 @@ const FEATURE_PROBES: Probe[] = [
     title: 'Calculator',
     subtitle: 'Basic arithmetic',
     icon: 'calculator',
+    check: async () => ({ available: true }),
+  },
+  {
+    id: 'unitConverter',
+    route: 'UnitConverter',
+    title: 'Unit converter',
+    subtitle: 'Length, area & more',
+    icon: 'swap-horizontal',
     check: async () => ({ available: true }),
   },
   {

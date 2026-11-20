@@ -17,6 +17,7 @@ import { MeasureScreen } from './screens/MeasureScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { SoundMeterScreen } from './screens/SoundMeterScreen';
 import { SpeedometerScreen } from './screens/SpeedometerScreen';
+import { UnitConverterScreen } from './screens/UnitConverterScreen';
 import { colors } from './theme';
 import type { RootStackParamList } from './types';
 
@@ -50,6 +51,7 @@ export function AppNavigator() {
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Measure" component={MeasureScreen} />
         <Stack.Screen name="Calculator" component={CalculatorScreen} />
+        <Stack.Screen name="UnitConverter" component={UnitConverterScreen} />
         <Stack.Screen name="ArMeasure" component={ArMeasureScreen} />
         <Stack.Screen name="Level" component={LevelScreen} />
         <Stack.Screen name="Inclinometer" component={InclinometerScreen} />
