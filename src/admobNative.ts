@@ -5,8 +5,11 @@
 export { default } from 'react-native-google-mobile-ads';
 export {
   AdEventType,
+  AppOpenAd,
   BannerAd,
   BannerAdSize,
   InterstitialAd,
+  RewardedAd,
+  RewardedAdEventType,
   TestIds,
 } from 'react-native-google-mobile-ads';

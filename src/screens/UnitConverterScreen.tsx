@@ -20,6 +20,7 @@ import {
   getCategory,
   type ConvertCategory,
 } from '../convert/units';
+import { BannerAdSlot } from '../components/BannerAdSlot';
 import { colors, spacing } from '../theme';
 
 /** Android dropdown menus are light; use dark labels for contrast. */
@@ -117,7 +118,6 @@ export function UnitConverterScreen() {
         styles.root,
         {
           paddingTop: insets.top + spacing.sm,
-          paddingBottom: Math.max(insets.bottom, spacing.md),
         },
       ]}
     >
@@ -194,6 +194,10 @@ export function UnitConverterScreen() {
           </Text>
         </View>
       </ScrollView>
+
+      <View style={{ paddingBottom: Math.max(insets.bottom, 0) }}>
+        <BannerAdSlot />
+      </View>
     </View>
   );
 }

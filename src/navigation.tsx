@@ -1,7 +1,15 @@
-import { NavigationContainer, DarkTheme } from '@react-navigation/native';
+import {
+  DarkTheme,
+  NavigationContainer,
+  useNavigationContainerRef,
+} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React from 'react';
+import React, { useRef } from 'react';
 
+import {
+  MEASURE_TOOL_ROUTES,
+  showInterstitialOnToolExit,
+} from './ads';
 import { AboutScreen } from './screens/AboutScreen';
 import { AngleMeterScreen } from './screens/AngleMeterScreen';
 import { ArMeasureScreen } from './screens/ArMeasureScreen';
@@ -39,8 +47,30 @@ const navTheme = {
 };
 
 export function AppNavigator() {
+  const navigationRef = useNavigationContainerRef<RootStackParamList>();
+  const routeNameRef = useRef<string | undefined>(undefined);
+
   return (
-    <NavigationContainer theme={navTheme}>
+    <NavigationContainer
+      ref={navigationRef}
+      theme={navTheme}
+      onReady={() => {
+        routeNameRef.current = navigationRef.getCurrentRoute()?.name;
+      }}
+      onStateChange={() => {
+        const previous = routeNameRef.current;
+        const current = navigationRef.getCurrentRoute()?.name;
+        if (
+          previous &&
+          current === 'Home' &&
+          MEASURE_TOOL_ROUTES.has(previous)
+        ) {
+          // Leave-tool → home only; never mid-measure.
+          showInterstitialOnToolExit();
+        }
+        routeNameRef.current = current;
+      }}
+    >
       <Stack.Navigator
         initialRouteName="Home"
         screenOptions={{

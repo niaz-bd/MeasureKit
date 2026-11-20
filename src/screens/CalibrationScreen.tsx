@@ -16,8 +16,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { showInterstitialAfterChrome } from '../ads';
-import { BannerAdSlot } from '../components/BannerAdSlot';
 import type { RootStackParamList } from '../types';
 import { useSettings } from '../SettingsContext';
 import { colors, spacing } from '../theme';
@@ -73,12 +71,10 @@ export function CalibrationScreen() {
     if (cardDp <= 0) return;
     const mmPerDp = CREDIT_CARD_LENGTH_MM / cardDp;
     await applyCalibration(mmPerDp);
-    showInterstitialAfterChrome();
     navigation.navigate('Measure');
   };
 
   const onCancel = () => {
-    showInterstitialAfterChrome();
     navigation.goBack();
   };
 
@@ -115,10 +111,6 @@ export function CalibrationScreen() {
         >
           <Text style={styles.primaryText}>Save calibration</Text>
         </Pressable>
-      </View>
-
-      <View style={styles.ad}>
-        <BannerAdSlot />
       </View>
     </View>
   );
@@ -218,8 +210,5 @@ const styles = StyleSheet.create({
   },
   disabled: {
     opacity: 0.4,
-  },
-  ad: {
-    marginTop: 'auto',
   },
 });

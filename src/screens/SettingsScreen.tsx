@@ -4,8 +4,8 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { showInterstitialAfterChrome } from '../ads';
 import { BannerAdSlot } from '../components/BannerAdSlot';
+import { RemoveAdsButton } from '../components/RemoveAdsButton';
 import type { RootStackParamList } from '../types';
 import { useSettings } from '../SettingsContext';
 import { colors, spacing } from '../theme';
@@ -39,7 +39,6 @@ export function SettingsScreen() {
   };
 
   const leave = () => {
-    showInterstitialAfterChrome();
     navigation.navigate('Home');
   };
 
@@ -84,10 +83,15 @@ export function SettingsScreen() {
         }}
       />
 
+      <Text style={styles.section}>Ads</Text>
+      <View style={styles.removeAds}>
+        <RemoveAdsButton />
+      </View>
+
       <Text style={styles.section}>About</Text>
       <Row label="About MeasureKit" onPress={() => navigation.navigate('About')} />
 
-      <View style={styles.ad}>
+      <View style={[styles.ad, { paddingBottom: Math.max(insets.bottom, 0) }]}>
         <BannerAdSlot />
       </View>
     </View>
@@ -169,7 +173,11 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: 13,
   },
+  removeAds: {
+    alignSelf: 'stretch',
+  },
   ad: {
     marginTop: 'auto',
+    marginHorizontal: -spacing.lg,
   },
 });

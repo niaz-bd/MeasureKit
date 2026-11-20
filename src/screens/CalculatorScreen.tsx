@@ -30,6 +30,7 @@ import {
   type CalcState,
   type Op,
 } from '../calc/engine';
+import { BannerAdSlot } from '../components/BannerAdSlot';
 import { colors, spacing } from '../theme';
 
 type Key =
@@ -144,7 +145,6 @@ export function CalculatorScreen() {
         styles.root,
         {
           paddingTop: insets.top + spacing.sm,
-          paddingBottom: Math.max(insets.bottom, spacing.md),
         },
       ]}
     >
@@ -254,6 +254,10 @@ export function CalculatorScreen() {
             })}
           </View>
         ))}
+      </View>
+
+      <View style={{ paddingBottom: Math.max(insets.bottom, 0) }}>
+        <BannerAdSlot />
       </View>
     </View>
   );

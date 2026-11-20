@@ -17,6 +17,8 @@ import {
   probeFeatureCapabilities,
   type FeatureCapability,
 } from '../capabilities';
+import { BannerAdSlot } from '../components/BannerAdSlot';
+import { RemoveAdsButton } from '../components/RemoveAdsButton';
 import { colors, spacing } from '../theme';
 import type { RootStackParamList } from '../types';
 
@@ -46,12 +48,16 @@ export function HomeScreen() {
         styles.root,
         {
           paddingTop: insets.top + spacing.md,
-          paddingBottom: Math.max(insets.bottom, spacing.md),
         },
       ]}
     >
-      <Text style={styles.brand}>MeasureKit</Text>
-      <Text style={styles.tagline}>Choose a tool</Text>
+      <View style={styles.top}>
+        <Text style={styles.brand}>MeasureKit</Text>
+        <Text style={styles.tagline}>Choose a tool</Text>
+        <View style={styles.removeAds}>
+          <RemoveAdsButton />
+        </View>
+      </View>
 
       {features == null ? (
         <View style={styles.loading}>
@@ -106,6 +112,10 @@ export function HomeScreen() {
           ))}
         </ScrollView>
       )}
+
+      <View style={{ paddingBottom: Math.max(insets.bottom, 0) }}>
+        <BannerAdSlot />
+      </View>
     </View>
   );
 }
@@ -115,6 +125,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.graphite,
     paddingHorizontal: spacing.md,
+  },
+  top: {
+    marginBottom: spacing.md,
   },
   brand: {
     color: colors.white,
@@ -126,7 +139,11 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: 15,
     marginTop: 4,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.sm,
+  },
+  removeAds: {
+    alignSelf: 'flex-start',
+    marginBottom: spacing.sm,
   },
   loading: {
     flex: 1,

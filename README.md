@@ -70,17 +70,32 @@ npx expo start
 
 ---
 
-## AdMob test IDs
+## AdMob strategy
 
-Configured in `app.json` (plugin) and `src/ads.ts`:
+| Placement | When |
+|-----------|------|
+| **Banner** | Sticky on Home, History, Settings, Calculator, Converter only — never on ruler / AR / sensor tools |
+| **Interstitial** | When leaving a measure tool → Home; **105s** cooldown (within 90–120s); never mid-drag / mid-AR place |
+| **Rewarded** | Optional **Remove ads 24h** on Home + Settings |
+| **App open** | Cold start only, and only after the first session has completed |
 
-| Kind | Android test ID |
-|------|-----------------|
-| App | `ca-app-pub-3940256099942544~3347511713` |
-| Banner | `ca-app-pub-3940256099942544/6300978111` |
-| Interstitial | `ca-app-pub-3940256099942544/1033173712` |
+Expo Go keeps Metro stubs (`EXPO_NO_ADMOB=1` / `src/admobStub.js`). Real ads need `npx expo run:android`.
 
-Swap to production IDs before store release.
+### Test vs production IDs
+
+**This build uses Google sample test IDs** (`USE_ADMOB_TEST_IDS = true` in `src/ads.ts`).  
+App IDs are also set on the `react-native-google-mobile-ads` plugin in `app.json`.
+
+| Kind | Android **test** ID | Production (replace before release) |
+|------|---------------------|-------------------------------------|
+| App | `ca-app-pub-3940256099942544~3347511713` | Your AdMob Android App ID in `app.json` |
+| Banner | `ca-app-pub-3940256099942544/6300978111` | Paste into `ADMOB_PRODUCTION_UNIT_IDS.banner` |
+| Interstitial | `ca-app-pub-3940256099942544/1033173712` | `…interstitial` |
+| Rewarded | `ca-app-pub-3940256099942544/5224354917` | `…rewarded` |
+| App open | `ca-app-pub-3940256099942544/9257395921` | `…appOpen` |
+
+iOS test units live beside the Android ones in `ADMOB_TEST_UNIT_IDS`.  
+Before store release: paste real unit IDs into `ADMOB_PRODUCTION_UNIT_IDS`, set `USE_ADMOB_TEST_IDS` to `false`, and swap App IDs in `app.json`.
 
 ## Scripts
 

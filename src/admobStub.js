@@ -12,7 +12,7 @@ function mobileAds() {
   };
 }
 
-class FakeInterstitial {
+class FakeFullScreenAd {
   loaded = false;
   load() {}
   show() {}
@@ -28,9 +28,23 @@ module.exports = {
   default: mobileAds,
   mobileAds,
   InterstitialAd: {
-    createForAdRequest: () => new FakeInterstitial(),
+    createForAdRequest: () => new FakeFullScreenAd(),
   },
-  AdEventType: { CLOSED: 'closed', LOADED: 'loaded', ERROR: 'error' },
+  RewardedAd: {
+    createForAdRequest: () => new FakeFullScreenAd(),
+  },
+  AppOpenAd: {
+    createForAdRequest: () => new FakeFullScreenAd(),
+  },
+  AdEventType: {
+    CLOSED: 'closed',
+    LOADED: 'loaded',
+    ERROR: 'error',
+  },
+  RewardedAdEventType: {
+    LOADED: 'rewarded_loaded',
+    EARNED_REWARD: 'rewarded_earned_reward',
+  },
   BannerAd,
   BannerAdSize: {
     ANCHORED_ADAPTIVE_BANNER: 'ANCHORED_ADAPTIVE_BANNER',
@@ -39,5 +53,7 @@ module.exports = {
   TestIds: {
     BANNER: 'stub-banner',
     INTERSTITIAL: 'stub-interstitial',
+    REWARDED: 'stub-rewarded',
+    APP_OPEN: 'stub-app-open',
   },
 };

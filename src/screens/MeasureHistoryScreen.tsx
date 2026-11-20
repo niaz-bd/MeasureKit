@@ -17,6 +17,7 @@ import {
   loadMeasureHistory,
   type MeasureHistoryEntry,
 } from '../history/measureHistory';
+import { BannerAdSlot } from '../components/BannerAdSlot';
 import { colors, spacing } from '../theme';
 
 export function MeasureHistoryScreen() {
@@ -47,7 +48,6 @@ export function MeasureHistoryScreen() {
         styles.root,
         {
           paddingTop: insets.top + spacing.sm,
-          paddingBottom: Math.max(insets.bottom, spacing.md),
         },
       ]}
     >
@@ -105,6 +105,10 @@ export function MeasureHistoryScreen() {
           )}
         />
       )}
+
+      <View style={{ paddingBottom: Math.max(insets.bottom, 0) }}>
+        <BannerAdSlot />
+      </View>
     </View>
   );
 }

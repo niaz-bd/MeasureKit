@@ -3,6 +3,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { AdsProvider } from './src/AdsContext';
 import { initializeAds } from './src/ads';
 import { ImmersiveSystemUI } from './src/ImmersiveSystemUI';
 import { AppNavigator } from './src/navigation';
@@ -38,7 +39,9 @@ export default function App() {
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
         <SettingsProvider>
-          <Root />
+          <AdsProvider>
+            <Root />
+          </AdsProvider>
         </SettingsProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

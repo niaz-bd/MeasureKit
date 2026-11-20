@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useAds } from '../AdsContext';
 import {
   adsAvailable,
   getAdsModule,
@@ -12,15 +13,16 @@ import {
 import { colors } from '../theme';
 
 /**
- * Banner for non-measure chrome only.
- * Never mounts BannerAd unless the native TurboModule is present.
+ * Sticky banner for hub chrome only (Home, History, Settings, Calculator,
+ * Converter). Hidden while ads-free. Never used on measure / AR screens.
  */
 export function BannerAdSlot() {
+  const { adsFreeActive } = useAds();
   const [ready, setReady] = useState(false);
   const canUseAds = hasAdMobNativeModule();
 
   useEffect(() => {
-    if (!canUseAds) return;
+    if (!canUseAds || adsFreeActive) return;
     let alive = true;
     (async () => {
       const ok = await initializeAds();
@@ -29,7 +31,11 @@ export function BannerAdSlot() {
     return () => {
       alive = false;
     };
-  }, [canUseAds]);
+  }, [canUseAds, adsFreeActive]);
+
+  if (adsFreeActive) {
+    return null;
+  }
 
   if (!canUseAds || !ready) {
     return (
