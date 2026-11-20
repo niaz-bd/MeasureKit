@@ -5,46 +5,52 @@ import {
   adsAvailable,
   getAdsModule,
   getBannerUnitId,
+  hasAdMobNativeModule,
   initializeAds,
   isExpoGo,
 } from '../ads';
 import { colors } from '../theme';
 
 /**
- * Banner for non-measure chrome only (settings / calibration / about).
- * Renders a quiet placeholder when the native AdMob module is unavailable
- * (e.g. Expo Go).
+ * Banner for non-measure chrome only.
+ * Never mounts BannerAd unless the native TurboModule is present.
  */
 export function BannerAdSlot() {
   const [ready, setReady] = useState(false);
-  const available = adsAvailable();
+  const canUseAds = hasAdMobNativeModule();
 
   useEffect(() => {
-    if (isExpoGo()) return;
+    if (!canUseAds) return;
     let alive = true;
     (async () => {
       const ok = await initializeAds();
-      if (alive) setReady(ok);
+      if (alive) setReady(ok && adsAvailable());
     })();
     return () => {
       alive = false;
     };
-  }, []);
+  }, [canUseAds]);
 
-  if (!available || !ready) {
+  if (!canUseAds || !ready) {
     return (
       <View style={styles.placeholder} accessibilityLabel="Ad placeholder">
         <Text style={styles.placeholderText}>
           {isExpoGo()
-            ? 'Ads need a native build (expo run:android)'
-            : 'AdMob test banner (loading…)'}
+            ? 'Ads need a native build — use: npx expo run:android'
+            : 'AdMob unavailable (native module missing)'}
         </Text>
       </View>
     );
   }
 
   const mod = getAdsModule();
-  if (!mod) return null;
+  if (!mod) {
+    return (
+      <View style={styles.placeholder} accessibilityLabel="Ad placeholder">
+        <Text style={styles.placeholderText}>AdMob unavailable</Text>
+      </View>
+    );
+  }
 
   const { BannerAd, BannerAdSize } = mod;
   return (
@@ -76,5 +82,7 @@ const styles = StyleSheet.create({
   placeholderText: {
     color: colors.textMuted,
     fontSize: 12,
+    textAlign: 'center',
+    paddingHorizontal: 12,
   },
 });

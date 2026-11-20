@@ -13,6 +13,7 @@ function Root() {
   const { ready } = useSettings();
 
   useEffect(() => {
+    // Safe no-op in Expo Go / when RNGoogleMobileAdsModule is missing.
     initializeAds().catch(() => undefined);
   }, []);
 

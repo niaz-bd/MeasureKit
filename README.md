@@ -16,22 +16,25 @@ Default `npx expo start` QR / links open a **custom development-build scheme** (
 
 ## Right now — pick one path
 
+> If you see `runtime 'custom'` / “Unable to determine redirect location”, you started **without** `--go`. Stop Metro and use the Expo Go command below (or install a native build).
+
 ### A) Quick UI in Expo Go (no real ads)
 
-1. On the phone: install **Expo Go** from Play Store (must be **SDK 58** / current store build).
-2. Phone + PC on the same Wi‑Fi (or use tunnel).
-3. On the PC:
+**Exact command:**
 
 ```bash
 cd f:\apps\expo\visual-ruler
 npm install
-npx expo start --go
+npm run start:go
 ```
 
-4. In the terminal, press `s` if needed until it says **Expo Go**, then scan the QR **with Expo Go** (or the Camera app that hands off to Expo Go).  
-   Do **not** open a bare `exp+…` link in Chrome.
+(`npm run start:go` = `EXPO_NO_ADMOB=1 expo start --go` — stubs AdMob in Metro so Expo Go never hits `RNGoogleMobileAdsModule`.)
 
-Ads show a placeholder strip. Ruler / calibration / units still work.
+1. Install **Expo Go** (SDK 58) from Play Store.
+2. Same Wi‑Fi (or press `s` → tunnel).
+3. Scan the QR **inside Expo Go**. Do not open `exp+…` links in Chrome.
+
+JS never loads AdMob in Expo Go (TurboModule probe + lazy loader). Ads show a placeholder.
 
 ### B) Full app + AdMob test ads (recommended)
 
