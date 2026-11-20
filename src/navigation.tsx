@@ -15,6 +15,7 @@ import { LightMeterScreen } from './screens/LightMeterScreen';
 import { MeasureScreen } from './screens/MeasureScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { SoundMeterScreen } from './screens/SoundMeterScreen';
+import { SpeedometerScreen } from './screens/SpeedometerScreen';
 import { colors } from './theme';
 import type { RootStackParamList } from './types';
 
@@ -53,6 +54,7 @@ export function AppNavigator() {
         <Stack.Screen name="Compass" component={CompassScreen} />
         <Stack.Screen name="AngleMeter" component={AngleMeterScreen} />
         <Stack.Screen name="LandArea" component={LandAreaScreen} />
+        <Stack.Screen name="Speedometer" component={SpeedometerScreen} />
         <Stack.Screen name="LightMeter" component={LightMeterScreen} />
         <Stack.Screen name="SoundMeter" component={SoundMeterScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />

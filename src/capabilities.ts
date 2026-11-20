@@ -23,9 +23,34 @@ export type FeatureId =
   | 'compass'
   | 'angleMeter'
   | 'landArea'
+  | 'speedometer'
   | 'lightMeter'
   | 'soundMeter'
   | 'settings';
+
+async function checkGpsAvailable(): Promise<{
+  available: boolean;
+  reason?: string;
+}> {
+  if (Platform.OS === 'web') {
+    return { available: false, reason: 'GPS not supported on web' };
+  }
+  try {
+    const enabled = await Location.hasServicesEnabledAsync();
+    if (!enabled) {
+      return {
+        available: false,
+        reason: 'Location services are turned off',
+      };
+    }
+    return { available: true };
+  } catch {
+    return {
+      available: false,
+      reason: 'Location services unavailable',
+    };
+  }
+}
 
 export type FeatureCapability = {
   id: FeatureId;
@@ -132,22 +157,16 @@ const FEATURE_PROBES: Probe[] = [
       if (Platform.OS === 'web') {
         return { available: false, reason: 'Maps not supported on web' };
       }
-      try {
-        const enabled = await Location.hasServicesEnabledAsync();
-        if (!enabled) {
-          return {
-            available: false,
-            reason: 'Location services are turned off',
-          };
-        }
-        return { available: true };
-      } catch {
-        return {
-          available: false,
-          reason: 'Location services unavailable',
-        };
-      }
+      return checkGpsAvailable();
     },
+  },
+  {
+    id: 'speedometer',
+    route: 'Speedometer',
+    title: 'Speedometer',
+    subtitle: 'GPS km/h & mph',
+    icon: 'speedometer',
+    check: checkGpsAvailable,
   },
   {
     id: 'lightMeter',
