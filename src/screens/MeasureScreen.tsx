@@ -313,17 +313,30 @@ export function MeasureScreen() {
           style={[styles.chrome, { paddingTop: spacing.sm }]}
           pointerEvents="box-none"
         >
-          <Pressable
-            accessibilityLabel="Open settings"
-            onPress={() => navigation.navigate('Settings')}
-            style={styles.iconBtn}
-          >
-            <MaterialCommunityIcons
-              name="cog-outline"
-              size={26}
-              color={colors.text}
-            />
-          </Pressable>
+          <View style={styles.leftCluster}>
+            <Pressable
+              accessibilityLabel="Open settings"
+              onPress={() => navigation.navigate('Settings')}
+              style={styles.iconBtn}
+            >
+              <MaterialCommunityIcons
+                name="cog-outline"
+                size={26}
+                color={colors.text}
+              />
+            </Pressable>
+            <Pressable
+              accessibilityLabel="Open spirit level"
+              onPress={() => navigation.navigate('Level')}
+              style={styles.iconBtn}
+            >
+              <MaterialCommunityIcons
+                name="spirit-level"
+                size={26}
+                color={colors.teal}
+              />
+            </Pressable>
+          </View>
 
           <View style={styles.centerChrome}>
             {topControls}
@@ -402,6 +415,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,
     zIndex: 4,
+  },
+  leftCluster: {
+    gap: spacing.sm,
   },
   centerChrome: {
     alignItems: 'center',

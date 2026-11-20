@@ -4,6 +4,7 @@ import React from 'react';
 
 import { AboutScreen } from './screens/AboutScreen';
 import { CalibrationScreen } from './screens/CalibrationScreen';
+import { LevelScreen } from './screens/LevelScreen';
 import { MeasureScreen } from './screens/MeasureScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { colors } from './theme';
@@ -37,6 +38,7 @@ export function AppNavigator() {
         }}
       >
         <Stack.Screen name="Measure" component={MeasureScreen} />
+        <Stack.Screen name="Level" component={LevelScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="Calibration" component={CalibrationScreen} />
         <Stack.Screen name="About" component={AboutScreen} />
