@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
 export const ADMOB_TEST_APP_IDS = {
@@ -23,13 +24,20 @@ type AdsModule = typeof import('react-native-google-mobile-ads');
 
 let adsModule: AdsModule | null = null;
 let initPromise: Promise<boolean> | null = null;
-let interstitial: ReturnType<AdsModule['InterstitialAd']['createForAdRequest']> | null =
-  null;
+let interstitial: ReturnType<
+  AdsModule['InterstitialAd']['createForAdRequest']
+> | null = null;
+
+/** Expo Go cannot host AdMob or other custom native modules. */
+export function isExpoGo(): boolean {
+  return Constants.appOwnership === 'expo';
+}
 
 function tryLoadAds(): AdsModule | null {
+  if (isExpoGo()) return null;
   if (adsModule) return adsModule;
   try {
-    // Native module is absent in Expo Go — import must be guarded.
+    // Native module is absent in Expo Go — never require() there.
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     adsModule = require('react-native-google-mobile-ads') as AdsModule;
     return adsModule;

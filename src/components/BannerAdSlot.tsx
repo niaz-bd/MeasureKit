@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { adsAvailable, getAdsModule, getBannerUnitId, initializeAds } from '../ads';
+import {
+  adsAvailable,
+  getAdsModule,
+  getBannerUnitId,
+  initializeAds,
+  isExpoGo,
+} from '../ads';
 import { colors } from '../theme';
 
 /**
@@ -14,6 +20,7 @@ export function BannerAdSlot() {
   const available = adsAvailable();
 
   useEffect(() => {
+    if (isExpoGo()) return;
     let alive = true;
     (async () => {
       const ok = await initializeAds();
@@ -27,7 +34,11 @@ export function BannerAdSlot() {
   if (!available || !ready) {
     return (
       <View style={styles.placeholder} accessibilityLabel="Ad placeholder">
-        <Text style={styles.placeholderText}>AdMob test banner (dev build)</Text>
+        <Text style={styles.placeholderText}>
+          {isExpoGo()
+            ? 'Ads need a native build (expo run:android)'
+            : 'AdMob test banner (loading…)'}
+        </Text>
       </View>
     );
   }

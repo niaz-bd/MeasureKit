@@ -6,7 +6,7 @@
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "scheme": "visualruler",
+    "scheme": "visual-ruler",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.visualruler.app"
@@ -34,7 +34,8 @@
           "androidAppId": "ca-app-pub-3940256099942544~3347511713",
           "iosAppId": "ca-app-pub-3940256099942544~1458002511"
         }
-      ]
+      ],
+      "expo-font"
     ]
   }
 }
