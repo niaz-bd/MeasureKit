@@ -4,10 +4,10 @@ export const CREDIT_CARD_LENGTH_MM = 85.6;
 /** React Native layout units are density-independent; 160 dp ≈ 1 inch. */
 export const DEFAULT_MM_PER_DP = 25.4 / 160;
 
-export type UnitSystem = 'inch' | 'm' | 'cm' | 'mm';
+export type UnitSystem = 'inch' | 'cm' | 'mm';
 
 /** Display order for unit selectors. */
-export const UNIT_OPTIONS: UnitSystem[] = ['inch', 'm', 'cm', 'mm'];
+export const UNIT_OPTIONS: UnitSystem[] = ['inch', 'cm', 'mm'];
 
 export type CalibrationState = {
   /** Millimetres per density-independent pixel (layout unit). */
@@ -21,7 +21,7 @@ export const defaultCalibration = (): CalibrationState => ({
 });
 
 export function isUnitSystem(value: string | null | undefined): value is UnitSystem {
-  return value === 'inch' || value === 'm' || value === 'cm' || value === 'mm';
+  return value === 'inch' || value === 'cm' || value === 'mm';
 }
 
 export function dpToMm(dp: number, mmPerDp: number): number {
@@ -38,8 +38,6 @@ export function mmToDisplay(mm: number, unit: UnitSystem): number {
       return mm;
     case 'cm':
       return mm / 10;
-    case 'm':
-      return mm / 1000;
     case 'inch':
       return mm / 25.4;
   }
@@ -51,8 +49,6 @@ export function formatDigits(unit: UnitSystem): number {
       return 1;
     case 'cm':
       return 2;
-    case 'm':
-      return 3;
     case 'inch':
       return 3;
   }
@@ -79,8 +75,6 @@ export function unitLabel(unit: UnitSystem): string {
   switch (unit) {
     case 'inch':
       return 'in';
-    case 'm':
-      return 'm';
     case 'cm':
       return 'cm';
     case 'mm':
@@ -92,8 +86,6 @@ export function unitDisplayName(unit: UnitSystem): string {
   switch (unit) {
     case 'inch':
       return 'Inches';
-    case 'm':
-      return 'Metres';
     case 'cm':
       return 'Centimetres';
     case 'mm':
@@ -105,11 +97,9 @@ export function unitDisplayName(unit: UnitSystem): string {
 export function majorTickMm(unit: UnitSystem): number {
   switch (unit) {
     case 'mm':
-      return 10; // label every 10 mm
+      return 10;
     case 'cm':
-      return 10; // 1 cm
-    case 'm':
-      return 100; // 0.1 m
+      return 10;
     case 'inch':
       return 25.4;
   }
@@ -122,8 +112,6 @@ export function minorTickMm(unit: UnitSystem): number {
       return 1;
     case 'cm':
       return 1;
-    case 'm':
-      return 10; // 1 cm steps on a metre scale
     case 'inch':
       return 25.4 / 16;
   }

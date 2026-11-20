@@ -38,6 +38,7 @@ export async function loadUnit(): Promise<UnitSystem> {
   try {
     const raw = await AsyncStorage.getItem(KEYS.unit);
     if (isUnitSystem(raw)) return raw;
+    // Legacy 'm' removed — fall back to cm.
     return 'cm';
   } catch {
     return 'cm';

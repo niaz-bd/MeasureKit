@@ -19,7 +19,6 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ArMeasurePanel } from '../ar/ArMeasurePanel';
-import { CameraBackdrop } from '../components/CameraBackdrop';
 import { GlowReadout } from '../components/GlowReadout';
 import { RulerTrack } from '../components/RulerTrack';
 import { useSettings } from '../SettingsContext';
@@ -93,10 +92,11 @@ export function MeasureScreen() {
     widthSV.value = w;
     if (!initialized.current && w > 0) {
       initialized.current = true;
-      const span = Math.min(w * 0.4, mmToDp(50, calibration.mmPerDp));
+      // Centered pair with a clear gap (≈28% of width, clamped).
+      const gap = Math.min(Math.max(w * 0.28, 96), w * 0.4);
       const mid = w / 2;
-      const l = Math.max(0, mid - span / 2);
-      const r = Math.min(w, mid + span / 2);
+      const l = mid - gap / 2;
+      const r = mid + gap / 2;
       leftX.value = l;
       rightX.value = r;
       syncFromBars(l, r);
@@ -266,8 +266,6 @@ export function MeasureScreen() {
 
   return (
     <View style={styles.root}>
-      <CameraBackdrop />
-
       <View style={styles.overlay} onLayout={onStageLayout}>
         <GestureDetector gesture={panLeft}>
           <Animated.View

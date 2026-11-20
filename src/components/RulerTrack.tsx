@@ -48,16 +48,6 @@ function formatTickLabel(mm: number, unit: UnitSystem, kind: TickKind): string {
       if (kind === 'major') return String(Math.round(rounded));
       return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
     }
-    case 'm': {
-      const rounded = Math.round(value * 1000) / 1000;
-      if (kind === 'major') {
-        if (Math.abs(rounded - Math.round(rounded)) < 0.001) {
-          return String(Math.round(rounded));
-        }
-        return rounded.toFixed(1);
-      }
-      return rounded.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
-    }
     case 'inch': {
       if (kind === 'major') return String(Math.round(value));
       const sixteenths = Math.round(value * 16) / 16;
@@ -111,8 +101,6 @@ function classifyTick(mm: number, unit: UnitSystem): TickKind {
     if (near(mm, major / 8)) return 'eighth';
   } else if (unit === 'cm' || unit === 'mm') {
     if (near(mm, 5)) return 'half';
-  } else if (unit === 'm') {
-    if (near(mm, 50)) return 'half'; // 0.05 m
   }
   return 'minor';
 }
