@@ -9,10 +9,14 @@
     "scheme": "visual-ruler",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.visualruler.app"
+      "bundleIdentifier": "com.visualruler.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Visual Ruler shows the back camera under the on-screen ruler so you can align real objects. Measurements use screen scale and calibration, not the camera image."
+      }
     },
     "android": {
       "package": "com.visualruler.app",
+      "permissions": ["android.permission.CAMERA"],
       "adaptiveIcon": {
         "backgroundColor": "#2A3038",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -35,7 +39,15 @@
           "iosAppId": "ca-app-pub-3940256099942544~1458002511"
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Visual Ruler to use the camera as a live viewfinder under the ruler overlay.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ]
     ]
   }
 }

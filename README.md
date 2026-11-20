@@ -2,6 +2,8 @@
 
 Android-first on-screen ruler built with Expo + React Native (SDK 58).
 
+Back-camera full-bleed under the landscape ruler overlay. Scale still uses density + credit-card calibration (camera is a viewfinder only). Allow camera when prompted; deny shows a clear retry / Open settings state.
+
 ## Why “no app on this device can handle it”?
 
 This project includes **`expo-dev-client`** and **`react-native-google-mobile-ads`**.  
@@ -34,7 +36,7 @@ npm run start:go
 2. Same Wi‑Fi (or press `s` → tunnel).
 3. Scan the QR **inside Expo Go**. Do not open `exp+…` links in Chrome.
 
-JS never loads AdMob in Expo Go (TurboModule probe + lazy loader). Ads show a placeholder.
+JS never loads AdMob in Expo Go (TurboModule probe + lazy loader). Ads show a placeholder. Tap **Allow camera** for the live preview under the ruler.
 
 ### B) Full app + AdMob test ads (recommended)
 

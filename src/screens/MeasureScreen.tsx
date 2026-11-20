@@ -18,17 +18,18 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { CameraBackdrop } from '../components/CameraBackdrop';
 import { GlowReadout } from '../components/GlowReadout';
 import { RulerTrack } from '../components/RulerTrack';
 import { useSettings } from '../SettingsContext';
 import { colors, spacing } from '../theme';
+import type { RootStackParamList } from '../types';
 import {
   dpToMm,
   formatMeasurement,
   mmToDp,
   unitLabel,
 } from '../units';
-import type { RootStackParamList } from '../types';
 
 const HANDLE_HIT = 44;
 const FINE_STEP_MM = 0.1;
@@ -139,80 +140,89 @@ export function MeasureScreen() {
   const bottomPad = Math.max(insets.bottom, 4);
 
   return (
-    <View style={[styles.root, { paddingTop: Math.max(insets.top, 8) }]}>
-      <View style={styles.chrome}>
-        <Pressable
-          accessibilityLabel="Open settings"
-          onPress={() => navigation.navigate('Settings')}
-          style={styles.iconBtn}
-        >
-          <MaterialCommunityIcons
-            name="cog-outline"
-            size={26}
-            color={colors.text}
-          />
-        </Pressable>
-
-        <GlowReadout value={readout} unit={unitLabel(unit)} />
-
-        <View style={styles.fineCluster}>
-          <Pressable
-            accessibilityLabel={
-              fineMode ? 'Disable fine adjust' : 'Enable fine adjust (turtle)'
-            }
-            onPress={() => setFineMode((v) => !v)}
-            style={[styles.iconBtn, fineMode && styles.iconBtnActive]}
-          >
-            <MaterialCommunityIcons
-              name="turtle"
-              size={28}
-              color={fineMode ? colors.teal : colors.textMuted}
-            />
-          </Pressable>
-          {fineMode ? (
-            <View style={styles.nudgeRow}>
-              <Pressable
-                accessibilityLabel="Decrease by 0.1 millimetre"
-                onPressIn={() => startHold(-1)}
-                onPressOut={stopHold}
-                style={styles.nudgeBtn}
-              >
-                <Text style={styles.nudgeText}>−</Text>
-              </Pressable>
-              <Pressable
-                accessibilityLabel="Increase by 0.1 millimetre"
-                onPressIn={() => startHold(1)}
-                onPressOut={stopHold}
-                style={styles.nudgeBtn}
-              >
-                <Text style={styles.nudgeText}>+</Text>
-              </Pressable>
-            </View>
-          ) : null}
-        </View>
-      </View>
-
-      <View style={styles.spacer} />
+    <View style={styles.root}>
+      <CameraBackdrop />
 
       <View
-        style={[styles.rulerEdge, { paddingBottom: bottomPad }]}
-        onLayout={onTrackLayout}
+        style={[
+          styles.overlay,
+          { paddingTop: Math.max(insets.top, 8) },
+        ]}
       >
-        <RulerTrack
-          width={trackWidth}
-          mmPerDp={calibration.mmPerDp}
-          unit={unit}
-        />
-        <GestureDetector gesture={pan}>
-          <Animated.View
-            style={[styles.handleHit, handleStyle]}
-            accessibilityLabel="Measure handle"
-            accessibilityRole="adjustable"
+        <View style={styles.chrome}>
+          <Pressable
+            accessibilityLabel="Open settings"
+            onPress={() => navigation.navigate('Settings')}
+            style={styles.iconBtn}
           >
-            <View style={styles.handleStem} />
-            <View style={styles.handleKnob} />
-          </Animated.View>
-        </GestureDetector>
+            <MaterialCommunityIcons
+              name="cog-outline"
+              size={26}
+              color={colors.text}
+            />
+          </Pressable>
+
+          <GlowReadout value={readout} unit={unitLabel(unit)} />
+
+          <View style={styles.fineCluster}>
+            <Pressable
+              accessibilityLabel={
+                fineMode ? 'Disable fine adjust' : 'Enable fine adjust (turtle)'
+              }
+              onPress={() => setFineMode((v) => !v)}
+              style={[styles.iconBtn, fineMode && styles.iconBtnActive]}
+            >
+              <MaterialCommunityIcons
+                name="turtle"
+                size={28}
+                color={fineMode ? colors.teal : colors.textMuted}
+              />
+            </Pressable>
+            {fineMode ? (
+              <View style={styles.nudgeRow}>
+                <Pressable
+                  accessibilityLabel="Decrease by 0.1 millimetre"
+                  onPressIn={() => startHold(-1)}
+                  onPressOut={stopHold}
+                  style={styles.nudgeBtn}
+                >
+                  <Text style={styles.nudgeText}>−</Text>
+                </Pressable>
+                <Pressable
+                  accessibilityLabel="Increase by 0.1 millimetre"
+                  onPressIn={() => startHold(1)}
+                  onPressOut={stopHold}
+                  style={styles.nudgeBtn}
+                >
+                  <Text style={styles.nudgeText}>+</Text>
+                </Pressable>
+              </View>
+            ) : null}
+          </View>
+        </View>
+
+        <View style={styles.spacer} />
+
+        <View
+          style={[styles.rulerEdge, { paddingBottom: bottomPad }]}
+          onLayout={onTrackLayout}
+        >
+          <RulerTrack
+            width={trackWidth}
+            mmPerDp={calibration.mmPerDp}
+            unit={unit}
+          />
+          <GestureDetector gesture={pan}>
+            <Animated.View
+              style={[styles.handleHit, handleStyle]}
+              accessibilityLabel="Measure handle"
+              accessibilityRole="adjustable"
+            >
+              <View style={styles.handleStem} />
+              <View style={styles.handleKnob} />
+            </Animated.View>
+          </GestureDetector>
+        </View>
       </View>
     </View>
   );
@@ -222,6 +232,9 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.graphite,
+  },
+  overlay: {
+    flex: 1,
   },
   chrome: {
     flexDirection: 'row',
@@ -239,7 +252,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.graphiteSoft,
+    backgroundColor: 'rgba(42, 48, 56, 0.72)',
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.graphiteEdge,
   },
@@ -261,7 +274,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.graphiteMid,
+    backgroundColor: 'rgba(58, 67, 78, 0.85)',
   },
   nudgeText: {
     color: colors.teal,
@@ -284,7 +297,7 @@ const styles = StyleSheet.create({
     width: 2,
     flex: 1,
     backgroundColor: colors.teal,
-    opacity: 0.85,
+    opacity: 0.9,
     shadowColor: colors.teal,
     shadowOpacity: 0.7,
     shadowRadius: 8,

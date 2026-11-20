@@ -43,6 +43,7 @@ export function RulerTrack({ width, mmPerDp, unit, height = 72 }: Props) {
 
   return (
     <View style={[styles.track, { height, width }]} pointerEvents="none">
+      <View style={styles.trackWash} />
       <View style={styles.baseline} />
       {ticks.map((t, idx) => {
         const h =
@@ -75,10 +76,18 @@ export function RulerTrack({ width, mmPerDp, unit, height = 72 }: Props) {
 const styles = StyleSheet.create({
   track: {
     position: 'relative',
-    backgroundColor: colors.graphiteSoft,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.graphiteEdge,
+    backgroundColor: 'transparent',
     overflow: 'hidden',
+  },
+  trackWash: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(30, 36, 43, 0.42)',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(74, 85, 96, 0.7)',
   },
   baseline: {
     position: 'absolute',
