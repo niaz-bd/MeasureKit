@@ -1,10 +1,22 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import * as ScreenOrientation from 'expo-screen-orientation';
-import React, { useCallback, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import {
+  appendCalcHistory,
+  clearCalcHistory,
+  loadCalcHistory,
+  type CalcHistoryEntry,
+} from '../calc/history';
 import {
   inputBackspace,
   inputClear,
@@ -14,6 +26,7 @@ import {
   inputOp,
   inputPercent,
   initialCalcState,
+  reuseResult,
   type CalcState,
   type Op,
 } from '../calc/engine';
@@ -61,6 +74,8 @@ export function CalculatorScreen() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const [state, setState] = useState<CalcState>(initialCalcState);
+  const [history, setHistory] = useState<CalcHistoryEntry[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -69,7 +84,24 @@ export function CalculatorScreen() {
     }, []),
   );
 
+  useEffect(() => {
+    loadCalcHistory().then(setHistory).catch(() => undefined);
+  }, []);
+
   const onKey = (key: Key) => {
+    if (key.kind === 'fn' && key.value === '=') {
+      setState((s) => {
+        const { state: next, history: entry } = inputEquals(s);
+        if (entry) {
+          appendCalcHistory(entry.expression, entry.result)
+            .then(setHistory)
+            .catch(() => undefined);
+        }
+        return next;
+      });
+      return;
+    }
+
     setState((s) => {
       switch (key.kind) {
         case 'digit':
@@ -86,11 +118,21 @@ export function CalculatorScreen() {
               return inputNegate(s);
             case '%':
               return inputPercent(s);
-            case '=':
-              return inputEquals(s);
+            default:
+              return s;
           }
       }
     });
+  };
+
+  const onReuse = (entry: CalcHistoryEntry) => {
+    setState(reuseResult(entry.result));
+    setShowHistory(false);
+  };
+
+  const onClearHistory = async () => {
+    await clearCalcHistory();
+    setHistory([]);
   };
 
   const expression =
@@ -117,8 +159,63 @@ export function CalculatorScreen() {
           <MaterialCommunityIcons name="arrow-left" size={24} color={colors.text} />
         </Pressable>
         <Text style={styles.title}>Calculator</Text>
-        <View style={styles.iconBtnPlaceholder} />
+        <Pressable
+          style={styles.iconBtn}
+          onPress={() => setShowHistory((v) => !v)}
+          accessibilityLabel={showHistory ? 'Hide history' : 'Show history'}
+        >
+          <MaterialCommunityIcons
+            name="history"
+            size={22}
+            color={showHistory ? colors.teal : colors.text}
+          />
+        </Pressable>
       </View>
+
+      {showHistory ? (
+        <View style={styles.historyPanel}>
+          <View style={styles.historyHeader}>
+            <Text style={styles.historyTitle}>History</Text>
+            <Pressable
+              onPress={onClearHistory}
+              disabled={history.length === 0}
+              accessibilityLabel="Clear history"
+            >
+              <Text
+                style={[
+                  styles.clearText,
+                  history.length === 0 && styles.clearTextOff,
+                ]}
+              >
+                Clear
+              </Text>
+            </Pressable>
+          </View>
+          {history.length === 0 ? (
+            <Text style={styles.emptyHistory}>No calculations yet.</Text>
+          ) : (
+            <FlatList
+              data={history}
+              keyExtractor={(item) => item.id}
+              style={styles.historyList}
+              renderItem={({ item }) => (
+                <Pressable
+                  style={styles.historyRow}
+                  onPress={() => onReuse(item)}
+                  accessibilityLabel={`Reuse ${item.result}`}
+                >
+                  <Text style={styles.historyExpr} numberOfLines={1}>
+                    {item.expression}
+                  </Text>
+                  <Text style={styles.historyResult} numberOfLines={1}>
+                    = {item.result}
+                  </Text>
+                </Pressable>
+              )}
+            />
+          )}
+        </View>
+      ) : null}
 
       <View style={styles.display}>
         <Text style={styles.expr} numberOfLines={1}>
@@ -200,11 +297,65 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.graphiteSoft,
   },
-  iconBtnPlaceholder: { width: 44, height: 44 },
   title: {
     color: colors.text,
     fontSize: 20,
     fontWeight: '600',
+  },
+  historyPanel: {
+    maxHeight: 180,
+    backgroundColor: colors.graphiteSoft,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.graphiteEdge,
+    marginBottom: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.xs,
+  },
+  historyHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.xs,
+  },
+  historyTitle: {
+    color: colors.textMuted,
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    fontWeight: '600',
+  },
+  clearText: {
+    color: colors.danger,
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  clearTextOff: {
+    opacity: 0.4,
+  },
+  emptyHistory: {
+    color: colors.textMuted,
+    fontSize: 13,
+    paddingVertical: spacing.sm,
+  },
+  historyList: {
+    maxHeight: 140,
+  },
+  historyRow: {
+    paddingVertical: 8,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.graphiteEdge,
+  },
+  historyExpr: {
+    color: colors.textMuted,
+    fontSize: 13,
+  },
+  historyResult: {
+    color: colors.teal,
+    fontSize: 16,
+    fontWeight: '700',
+    marginTop: 2,
   },
   display: {
     backgroundColor: colors.graphiteSoft,
@@ -214,7 +365,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     borderWidth: 1,
     borderColor: colors.graphiteEdge,
-    minHeight: 120,
+    minHeight: 100,
     justifyContent: 'flex-end',
   },
   expr: {

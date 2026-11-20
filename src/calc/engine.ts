@@ -75,13 +75,42 @@ export function inputOp(state: CalcState, next: Op): CalcState {
   };
 }
 
-export function inputEquals(state: CalcState): CalcState {
-  if (state.display === 'Error') return initialCalcState();
-  if (state.acc == null || state.op == null) return { ...state, fresh: true };
+export type EqualsOutcome = {
+  state: CalcState;
+  /** Present when a real binary expression was evaluated. */
+  history?: { expression: string; result: string };
+};
+
+export function inputEquals(state: CalcState): EqualsOutcome {
+  if (state.display === 'Error') {
+    return { state: initialCalcState() };
+  }
+  if (state.acc == null || state.op == null) {
+    return { state: { ...state, fresh: true } };
+  }
   const cur = parseFloat(state.display);
   const result = applyOp(state.acc, cur, state.op);
+  const resultStr = formatNum(result);
+  const expression = `${formatNum(state.acc)} ${state.op} ${formatNum(cur)}`;
   return {
-    display: formatNum(result),
+    state: {
+      display: resultStr,
+      acc: null,
+      op: null,
+      fresh: true,
+    },
+    history:
+      resultStr !== 'Error'
+        ? { expression, result: resultStr }
+        : undefined,
+  };
+}
+
+/** Load a past result into the display for reuse. */
+export function reuseResult(result: string): CalcState {
+  if (!result || result === 'Error') return initialCalcState();
+  return {
+    display: result,
     acc: null,
     op: null,
     fresh: true,
