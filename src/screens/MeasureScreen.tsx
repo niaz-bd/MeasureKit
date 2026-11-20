@@ -358,6 +358,17 @@ export function MeasureScreen() {
                 color={colors.teal}
               />
             </Pressable>
+            <Pressable
+              accessibilityLabel="Open angle meter"
+              onPress={() => navigation.navigate('AngleMeter')}
+              style={styles.iconBtn}
+            >
+              <MaterialCommunityIcons
+                name="angle-right"
+                size={26}
+                color={colors.teal}
+              />
+            </Pressable>
           </View>
 
           <View style={styles.centerChrome}>

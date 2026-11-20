@@ -3,6 +3,7 @@ export type RootStackParamList = {
   Level: undefined;
   Inclinometer: undefined;
   Compass: undefined;
+  AngleMeter: undefined;
   Settings: undefined;
   Calibration: undefined;
   About: undefined;

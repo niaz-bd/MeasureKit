@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 
 import { AboutScreen } from './screens/AboutScreen';
+import { AngleMeterScreen } from './screens/AngleMeterScreen';
 import { CalibrationScreen } from './screens/CalibrationScreen';
 import { CompassScreen } from './screens/CompassScreen';
 import { InclinometerScreen } from './screens/InclinometerScreen';
@@ -43,6 +44,7 @@ export function AppNavigator() {
         <Stack.Screen name="Level" component={LevelScreen} />
         <Stack.Screen name="Inclinometer" component={InclinometerScreen} />
         <Stack.Screen name="Compass" component={CompassScreen} />
+        <Stack.Screen name="AngleMeter" component={AngleMeterScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="Calibration" component={CalibrationScreen} />
         <Stack.Screen name="About" component={AboutScreen} />
