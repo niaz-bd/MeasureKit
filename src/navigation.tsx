@@ -4,8 +4,10 @@ import React from 'react';
 
 import { AboutScreen } from './screens/AboutScreen';
 import { AngleMeterScreen } from './screens/AngleMeterScreen';
+import { ArMeasureScreen } from './screens/ArMeasureScreen';
 import { CalibrationScreen } from './screens/CalibrationScreen';
 import { CompassScreen } from './screens/CompassScreen';
+import { HomeScreen } from './screens/HomeScreen';
 import { InclinometerScreen } from './screens/InclinometerScreen';
 import { LandAreaScreen } from './screens/LandAreaScreen';
 import { LevelScreen } from './screens/LevelScreen';
@@ -35,14 +37,16 @@ export function AppNavigator() {
   return (
     <NavigationContainer theme={navTheme}>
       <Stack.Navigator
-        initialRouteName="Measure"
+        initialRouteName="Home"
         screenOptions={{
           headerShown: false,
           animation: 'fade',
           contentStyle: { backgroundColor: colors.graphite },
         }}
       >
+        <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Measure" component={MeasureScreen} />
+        <Stack.Screen name="ArMeasure" component={ArMeasureScreen} />
         <Stack.Screen name="Level" component={LevelScreen} />
         <Stack.Screen name="Inclinometer" component={InclinometerScreen} />
         <Stack.Screen name="Compass" component={CompassScreen} />

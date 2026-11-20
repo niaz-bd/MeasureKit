@@ -57,7 +57,7 @@ export function ArMeasurePanel({ unit, onOpenSettings, onBackToContact }: Props)
           AR mode and tap two points on a detected plane.
         </Text>
         <Pressable style={styles.btn} onPress={onBackToContact}>
-          <Text style={styles.btnText}>Back to On-screen</Text>
+          <Text style={styles.btnText}>Back to menu</Text>
         </Pressable>
         <Pressable
           style={styles.link}
@@ -79,7 +79,7 @@ export function ArMeasurePanel({ unit, onOpenSettings, onBackToContact }: Props)
         <Text style={styles.title}>AR unavailable on this device</Text>
         <Text style={styles.body}>{loadError}</Text>
         <Pressable style={styles.btn} onPress={onBackToContact}>
-          <Text style={styles.btnText}>Back to On-screen</Text>
+          <Text style={styles.btnText}>Back to menu</Text>
         </Pressable>
       </View>
     );

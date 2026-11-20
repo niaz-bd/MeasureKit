@@ -40,7 +40,7 @@ export function SettingsScreen() {
 
   const leave = () => {
     showInterstitialAfterChrome();
-    navigation.navigate('Measure');
+    navigation.navigate('Home');
   };
 
   const calibratedLabel = calibration.calibratedAt

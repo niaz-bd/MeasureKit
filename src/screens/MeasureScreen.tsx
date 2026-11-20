@@ -18,7 +18,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ArMeasurePanel } from '../ar/ArMeasurePanel';
 import { GlowReadout } from '../components/GlowReadout';
 import { RulerTrack } from '../components/RulerTrack';
 import { useSettings } from '../SettingsContext';
@@ -41,14 +40,12 @@ const COARSE_DRAG_FACTOR = 1;
 const FINE_DRAG_FACTOR = 0.22;
 
 type ActiveBar = 'left' | 'right';
-type MeasureMode = 'contact' | 'ar';
 
 export function MeasureScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const insets = useSafeAreaInsets();
   const { unit, setUnit, calibration } = useSettings();
-  const [mode, setMode] = useState<MeasureMode>('contact');
   const [trackWidth, setTrackWidth] = useState(0);
   const [fineMode, setFineMode] = useState(false);
   const [displayMm, setDisplayMm] = useState(0);
@@ -209,60 +206,23 @@ export function MeasureScreen() {
     setUnit(next).catch(() => undefined);
   };
 
-  const topControls = (
-    <View style={styles.topControls} pointerEvents="box-none">
-      <View style={styles.modeToggle}>
+  const unitToggle = (
+    <View style={styles.unitToggle}>
+      {UNIT_OPTIONS.map((u) => (
         <Pressable
-          style={[styles.modeBtn, mode === 'contact' && styles.modeBtnOn]}
-          onPress={() => setMode('contact')}
+          key={u}
+          accessibilityLabel={`Use ${unitDisplayName(u)}`}
+          accessibilityState={{ selected: unit === u }}
+          style={[styles.unitBtn, unit === u && styles.unitBtnOn]}
+          onPress={() => pickUnit(u)}
         >
-          <Text
-            style={[styles.modeText, mode === 'contact' && styles.modeTextOn]}
-          >
-            On-screen
+          <Text style={[styles.unitText, unit === u && styles.unitTextOn]}>
+            {unitLabel(u)}
           </Text>
         </Pressable>
-        <Pressable
-          style={[styles.modeBtn, mode === 'ar' && styles.modeBtnOn]}
-          onPress={() => setMode('ar')}
-        >
-          <Text style={[styles.modeText, mode === 'ar' && styles.modeTextOn]}>
-            AR
-          </Text>
-        </Pressable>
-      </View>
-      <View style={styles.unitToggle}>
-        {UNIT_OPTIONS.map((u) => (
-          <Pressable
-            key={u}
-            accessibilityLabel={`Use ${unitDisplayName(u)}`}
-            accessibilityState={{ selected: unit === u }}
-            style={[styles.unitBtn, unit === u && styles.unitBtnOn]}
-            onPress={() => pickUnit(u)}
-          >
-            <Text style={[styles.unitText, unit === u && styles.unitTextOn]}>
-              {unitLabel(u)}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
+      ))}
     </View>
   );
-
-  if (mode === 'ar') {
-    return (
-      <View style={styles.root}>
-        <ArMeasurePanel
-          unit={unit}
-          onOpenSettings={() => navigation.navigate('Settings')}
-          onBackToContact={() => setMode('contact')}
-        />
-        <View style={styles.arModeSlot} pointerEvents="box-none">
-          {topControls}
-        </View>
-      </View>
-    );
-  }
 
   return (
     <View style={styles.root}>
@@ -315,6 +275,17 @@ export function MeasureScreen() {
         >
           <View style={styles.leftCluster}>
             <Pressable
+              accessibilityLabel="Back to menu"
+              onPress={() => navigation.navigate('Home')}
+              style={styles.iconBtn}
+            >
+              <MaterialCommunityIcons
+                name="arrow-left"
+                size={26}
+                color={colors.text}
+              />
+            </Pressable>
+            <Pressable
               accessibilityLabel="Open settings"
               onPress={() => navigation.navigate('Settings')}
               style={styles.iconBtn}
@@ -325,76 +296,10 @@ export function MeasureScreen() {
                 color={colors.text}
               />
             </Pressable>
-            <Pressable
-              accessibilityLabel="Open spirit level"
-              onPress={() => navigation.navigate('Level')}
-              style={styles.iconBtn}
-            >
-              <MaterialCommunityIcons
-                name="spirit-level"
-                size={26}
-                color={colors.teal}
-              />
-            </Pressable>
-            <Pressable
-              accessibilityLabel="Open inclinometer"
-              onPress={() => navigation.navigate('Inclinometer')}
-              style={styles.iconBtn}
-            >
-              <MaterialCommunityIcons
-                name="angle-acute"
-                size={26}
-                color={colors.teal}
-              />
-            </Pressable>
-            <Pressable
-              accessibilityLabel="Open compass"
-              onPress={() => navigation.navigate('Compass')}
-              style={styles.iconBtn}
-            >
-              <MaterialCommunityIcons
-                name="compass-outline"
-                size={26}
-                color={colors.teal}
-              />
-            </Pressable>
-            <Pressable
-              accessibilityLabel="Open angle meter"
-              onPress={() => navigation.navigate('AngleMeter')}
-              style={styles.iconBtn}
-            >
-              <MaterialCommunityIcons
-                name="angle-right"
-                size={26}
-                color={colors.teal}
-              />
-            </Pressable>
-            <Pressable
-              accessibilityLabel="Open land area calculator"
-              onPress={() => navigation.navigate('LandArea')}
-              style={styles.iconBtn}
-            >
-              <MaterialCommunityIcons
-                name="vector-polygon"
-                size={26}
-                color={colors.teal}
-              />
-            </Pressable>
-            <Pressable
-              accessibilityLabel="Open light meter"
-              onPress={() => navigation.navigate('LightMeter')}
-              style={styles.iconBtn}
-            >
-              <MaterialCommunityIcons
-                name="white-balance-sunny"
-                size={26}
-                color={colors.teal}
-              />
-            </Pressable>
           </View>
 
           <View style={styles.centerChrome}>
-            {topControls}
+            {unitToggle}
             <GlowReadout value={readout} unit={unitLabel(unit)} />
           </View>
 
@@ -477,46 +382,6 @@ const styles = StyleSheet.create({
   centerChrome: {
     alignItems: 'center',
     gap: spacing.sm,
-  },
-  arModeSlot: {
-    position: 'absolute',
-    top: spacing.sm,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    zIndex: 20,
-  },
-  topControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexWrap: 'nowrap',
-    gap: spacing.sm,
-    zIndex: 5,
-  },
-  modeToggle: {
-    flexDirection: 'row',
-    flexShrink: 0,
-    backgroundColor: 'rgba(42, 48, 56, 0.82)',
-    borderRadius: 12,
-    padding: 3,
-    gap: 2,
-  },
-  modeBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
-  },
-  modeBtnOn: {
-    backgroundColor: colors.teal,
-  },
-  modeText: {
-    color: colors.textMuted,
-    fontWeight: '600',
-    fontSize: 13,
-  },
-  modeTextOn: {
-    color: colors.graphite,
   },
   unitToggle: {
     flexDirection: 'row',

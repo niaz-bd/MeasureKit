@@ -1,5 +1,7 @@
 export type RootStackParamList = {
+  Home: undefined;
   Measure: undefined;
+  ArMeasure: undefined;
   Level: undefined;
   Inclinometer: undefined;
   Compass: undefined;
