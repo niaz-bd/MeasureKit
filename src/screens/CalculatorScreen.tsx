@@ -75,7 +75,6 @@ export function CalculatorScreen() {
   const insets = useSafeAreaInsets();
   const [state, setState] = useState<CalcState>(initialCalcState);
   const [history, setHistory] = useState<CalcHistoryEntry[]>([]);
-  const [showHistory, setShowHistory] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -127,7 +126,6 @@ export function CalculatorScreen() {
 
   const onReuse = (entry: CalcHistoryEntry) => {
     setState(reuseResult(entry.result));
-    setShowHistory(false);
   };
 
   const onClearHistory = async () => {
@@ -159,63 +157,8 @@ export function CalculatorScreen() {
           <MaterialCommunityIcons name="arrow-left" size={24} color={colors.text} />
         </Pressable>
         <Text style={styles.title}>Calculator</Text>
-        <Pressable
-          style={styles.iconBtn}
-          onPress={() => setShowHistory((v) => !v)}
-          accessibilityLabel={showHistory ? 'Hide history' : 'Show history'}
-        >
-          <MaterialCommunityIcons
-            name="history"
-            size={22}
-            color={showHistory ? colors.teal : colors.text}
-          />
-        </Pressable>
+        <View style={styles.iconBtnPlaceholder} />
       </View>
-
-      {showHistory ? (
-        <View style={styles.historyPanel}>
-          <View style={styles.historyHeader}>
-            <Text style={styles.historyTitle}>History</Text>
-            <Pressable
-              onPress={onClearHistory}
-              disabled={history.length === 0}
-              accessibilityLabel="Clear history"
-            >
-              <Text
-                style={[
-                  styles.clearText,
-                  history.length === 0 && styles.clearTextOff,
-                ]}
-              >
-                Clear
-              </Text>
-            </Pressable>
-          </View>
-          {history.length === 0 ? (
-            <Text style={styles.emptyHistory}>No calculations yet.</Text>
-          ) : (
-            <FlatList
-              data={history}
-              keyExtractor={(item) => item.id}
-              style={styles.historyList}
-              renderItem={({ item }) => (
-                <Pressable
-                  style={styles.historyRow}
-                  onPress={() => onReuse(item)}
-                  accessibilityLabel={`Reuse ${item.result}`}
-                >
-                  <Text style={styles.historyExpr} numberOfLines={1}>
-                    {item.expression}
-                  </Text>
-                  <Text style={styles.historyResult} numberOfLines={1}>
-                    = {item.result}
-                  </Text>
-                </Pressable>
-              )}
-            />
-          )}
-        </View>
-      ) : null}
 
       <View style={styles.display}>
         <Text style={styles.expr} numberOfLines={1}>
@@ -232,6 +175,50 @@ export function CalculatorScreen() {
         >
           {state.display}
         </Text>
+      </View>
+
+      <View style={styles.historyPanel}>
+        <View style={styles.historyHeader}>
+          <Text style={styles.historyTitle}>History</Text>
+          <Pressable
+            onPress={onClearHistory}
+            disabled={history.length === 0}
+            accessibilityLabel="Clear history"
+          >
+            <Text
+              style={[
+                styles.clearText,
+                history.length === 0 && styles.clearTextOff,
+              ]}
+            >
+              Clear
+            </Text>
+          </Pressable>
+        </View>
+        {history.length === 0 ? (
+          <Text style={styles.emptyHistory}>No calculations yet.</Text>
+        ) : (
+          <FlatList
+            data={history}
+            keyExtractor={(item) => item.id}
+            style={styles.historyList}
+            keyboardShouldPersistTaps="handled"
+            renderItem={({ item }) => (
+              <Pressable
+                style={styles.historyRow}
+                onPress={() => onReuse(item)}
+                accessibilityLabel={`Reuse ${item.result}`}
+              >
+                <Text style={styles.historyExpr} numberOfLines={1}>
+                  {item.expression}
+                </Text>
+                <Text style={styles.historyResult} numberOfLines={1}>
+                  = {item.result}
+                </Text>
+              </Pressable>
+            )}
+          />
+        )}
       </View>
 
       <View style={styles.pad}>
@@ -297,13 +284,45 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.graphiteSoft,
   },
+  iconBtnPlaceholder: { width: 44, height: 44 },
   title: {
     color: colors.text,
     fontSize: 20,
     fontWeight: '600',
   },
+  display: {
+    backgroundColor: colors.graphiteSoft,
+    borderRadius: 16,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    marginBottom: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.graphiteEdge,
+    minHeight: 88,
+    justifyContent: 'flex-end',
+  },
+  expr: {
+    color: colors.textMuted,
+    fontSize: 16,
+    textAlign: 'right',
+    marginBottom: 6,
+  },
+  value: {
+    color: colors.white,
+    fontSize: 44,
+    fontWeight: '700',
+    textAlign: 'right',
+  },
+  valueCompact: {
+    fontSize: 34,
+  },
+  valueTiny: {
+    fontSize: 26,
+  },
   historyPanel: {
-    maxHeight: 180,
+    flexGrow: 0,
+    flexShrink: 1,
+    maxHeight: 160,
     backgroundColor: colors.graphiteSoft,
     borderRadius: 14,
     borderWidth: 1,
@@ -340,7 +359,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   historyList: {
-    maxHeight: 140,
+    flexGrow: 0,
   },
   historyRow: {
     paddingVertical: 8,
@@ -357,35 +376,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginTop: 2,
   },
-  display: {
-    backgroundColor: colors.graphiteSoft,
-    borderRadius: 16,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.lg,
-    marginBottom: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.graphiteEdge,
-    minHeight: 100,
-    justifyContent: 'flex-end',
-  },
-  expr: {
-    color: colors.textMuted,
-    fontSize: 16,
-    textAlign: 'right',
-    marginBottom: 6,
-  },
-  value: {
-    color: colors.white,
-    fontSize: 48,
-    fontWeight: '700',
-    textAlign: 'right',
-  },
-  valueCompact: {
-    fontSize: 36,
-  },
-  valueTiny: {
-    fontSize: 28,
-  },
   pad: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -399,7 +389,7 @@ const styles = StyleSheet.create({
   key: {
     flex: 1,
     aspectRatio: 1.15,
-    maxHeight: 78,
+    maxHeight: 72,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
