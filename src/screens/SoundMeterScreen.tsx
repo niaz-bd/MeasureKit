@@ -6,6 +6,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { hasExponentAv } from '../av/avAvailability';
 import { loadExpoAvAudio } from '../av/loadExpoAv';
+import { useLogMeasurementOnLeave } from '../history/useLogMeasurementOnLeave';
 import {
   dbToBar,
   formatDb,
@@ -36,6 +37,18 @@ export function SoundMeterScreen() {
       };
     }, []),
   );
+
+  useLogMeasurementOnLeave('soundMeter', 'Sound meter', () => {
+    if (nativeMissing || !(db > 0)) return null;
+    return {
+      summary: `${formatDb(db)} dB`,
+      values: {
+        db: Number(db.toFixed(1)),
+        peakDb: Number(peakDb.toFixed(1)),
+        scene: soundSceneLabel(db),
+      },
+    };
+  });
 
   const requestMicAgain = async () => {
     const Audio = loadExpoAvAudio();

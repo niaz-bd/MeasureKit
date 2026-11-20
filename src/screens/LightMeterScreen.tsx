@@ -9,6 +9,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useLogMeasurementOnLeave } from '../history/useLogMeasurementOnLeave';
 import {
   formatLux,
   lightSceneLabel,
@@ -41,6 +42,18 @@ export function LightMeterScreen() {
       return () => undefined;
     }, []),
   );
+
+  useLogMeasurementOnLeave('lightMeter', 'Light meter', () => {
+    if (!(lux > 0)) return null;
+    return {
+      summary: `${formatLux(lux)} lux`,
+      values: {
+        lux: Number(lux.toFixed(2)),
+        scene: lightSceneLabel(lux),
+        source: source ?? 'unknown',
+      },
+    };
+  });
 
   // Auto-start camera estimate when ambient sensor is missing
   useEffect(() => {

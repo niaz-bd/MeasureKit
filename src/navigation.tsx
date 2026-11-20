@@ -13,6 +13,7 @@ import { InclinometerScreen } from './screens/InclinometerScreen';
 import { LandAreaScreen } from './screens/LandAreaScreen';
 import { LevelScreen } from './screens/LevelScreen';
 import { LightMeterScreen } from './screens/LightMeterScreen';
+import { MeasureHistoryScreen } from './screens/MeasureHistoryScreen';
 import { MeasureScreen } from './screens/MeasureScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { SoundMeterScreen } from './screens/SoundMeterScreen';
@@ -52,6 +53,7 @@ export function AppNavigator() {
         <Stack.Screen name="Measure" component={MeasureScreen} />
         <Stack.Screen name="Calculator" component={CalculatorScreen} />
         <Stack.Screen name="UnitConverter" component={UnitConverterScreen} />
+        <Stack.Screen name="MeasureHistory" component={MeasureHistoryScreen} />
         <Stack.Screen name="ArMeasure" component={ArMeasureScreen} />
         <Stack.Screen name="Level" component={LevelScreen} />
         <Stack.Screen name="Inclinometer" component={InclinometerScreen} />

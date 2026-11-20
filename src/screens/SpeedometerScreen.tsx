@@ -5,6 +5,7 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import React, { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { useLogMeasurementOnLeave } from '../history/useLogMeasurementOnLeave';
 import { formatSpeed } from '../sensors/speed';
 import { useSmoothedSpeed } from '../sensors/useSmoothedSpeed';
 import { colors, spacing } from '../theme';
@@ -29,6 +30,17 @@ export function SpeedometerScreen() {
       return () => setActive(false);
     }, []),
   );
+
+  useLogMeasurementOnLeave('speedometer', 'Speedometer', () => {
+    if (!(kmh > 0.5)) return null;
+    return {
+      summary: `${formatSpeed(kmh)} km/h`,
+      values: {
+        kmh: Number(kmh.toFixed(1)),
+        mph: Number(mph.toFixed(1)),
+      },
+    };
+  });
 
   const requestLocationAgain = async () => {
     const perm = await Location.requestForegroundPermissionsAsync();

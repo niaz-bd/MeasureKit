@@ -14,6 +14,7 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated';
 
+import { logMeasurement } from '../history/measureHistory';
 import {
   angleBetweenVec3,
   cornerAngles,
@@ -114,9 +115,20 @@ export function AngleMeterScreen() {
       setEdge1(sample);
       liveAngleSv.value = 0;
     } else if (!edge2) {
+      const deg = angleBetweenVec3(edge1, sample);
+      const corners = cornerAngles(deg);
       setEdge2(sample);
-      lockedAngleSv.value = angleBetweenVec3(edge1, sample);
+      lockedAngleSv.value = deg;
       doneSv.value = 1;
+      logMeasurement({
+        toolId: 'angleMeter',
+        toolName: 'Angle meter',
+        summary: `${corners.primary.toFixed(1)}°`,
+        values: {
+          primaryDeg: Number(corners.primary.toFixed(2)),
+          supplementDeg: Number(corners.supplement.toFixed(2)),
+        },
+      }).catch(() => undefined);
     }
   };
 

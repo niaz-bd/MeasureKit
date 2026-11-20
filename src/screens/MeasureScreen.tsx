@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GlowReadout } from '../components/GlowReadout';
 import { RulerTrack } from '../components/RulerTrack';
+import { useLogMeasurementOnLeave } from '../history/useLogMeasurementOnLeave';
 import { useSettings } from '../SettingsContext';
 import { colors, spacing } from '../theme';
 import type { RootStackParamList } from '../types';
@@ -70,6 +71,15 @@ export function MeasureScreen() {
       };
     }, []),
   );
+
+  useLogMeasurementOnLeave('ruler', 'Ruler', () => {
+    if (!(displayMm > 0)) return null;
+    const summary = `${formatMeasurement(displayMm, unit)} ${unitLabel(unit)}`;
+    return {
+      summary,
+      values: { mm: Number(displayMm.toFixed(3)), unit },
+    };
+  });
 
   useEffect(() => {
     fineModeSV.value = fineMode ? 1 : 0;

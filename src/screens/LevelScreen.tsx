@@ -14,6 +14,8 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated';
 
+import { logMeasurement } from '../history/measureHistory';
+import { useLogMeasurementOnLeave } from '../history/useLogMeasurementOnLeave';
 import { pctFromDeg } from '../sensors/tilt';
 import { useSmoothedTilt } from '../sensors/useSmoothedTilt';
 import { colors, spacing } from '../theme';
@@ -50,6 +52,15 @@ export function LevelScreen() {
 
   const magnitude = Math.hypot(rollDeg, pitchDeg);
   const isLevel = magnitude <= LEVEL_TOLERANCE_DEG;
+
+  useLogMeasurementOnLeave('level', 'Spirit level', () => ({
+    summary: `Tilt ${magnitude.toFixed(1)}°`,
+    values: {
+      rollDeg: Number(rollDeg.toFixed(2)),
+      pitchDeg: Number(pitchDeg.toFixed(2)),
+      level: isLevel ? 'yes' : 'no',
+    },
+  }));
 
   const bubbleStyle = useAnimatedStyle(() => {
     const travel = travelSV.value;
@@ -161,7 +172,21 @@ export function LevelScreen() {
       </View>
 
       <View style={styles.actions}>
-        <Pressable style={styles.btn} onPress={setZeroFromLatest}>
+        <Pressable
+          style={styles.btn}
+          onPress={() => {
+            setZeroFromLatest();
+            logMeasurement({
+              toolId: 'level',
+              toolName: 'Spirit level',
+              summary: 'Zero calibrated',
+              values: {
+                rollDeg: Number(rollDeg.toFixed(2)),
+                pitchDeg: Number(pitchDeg.toFixed(2)),
+              },
+            }).catch(() => undefined);
+          }}
+        >
           <Text style={styles.btnText}>Zero here</Text>
         </Pressable>
         <Pressable style={styles.btnSecondary} onPress={resetZero}>

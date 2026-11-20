@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
+import { useLogMeasurementOnLeave } from '../history/useLogMeasurementOnLeave';
 import { gradeFromDeg } from '../sensors/tilt';
 import { useSmoothedTilt } from '../sensors/useSmoothedTilt';
 import { colors, spacing } from '../theme';
@@ -48,6 +49,15 @@ export function InclinometerScreen() {
 
   const displayDeg =
     axis === 'incline' ? inclineDeg : axis === 'roll' ? rollDeg : pitchDeg;
+
+  useLogMeasurementOnLeave('inclinometer', 'Inclinometer', () => ({
+    summary: `${axis} ${displayDeg.toFixed(1)}°`,
+    values: {
+      axis,
+      deg: Number(displayDeg.toFixed(2)),
+      grade: gradeFromDeg(Math.abs(displayDeg)),
+    },
+  }));
 
   const needleStyle = useAnimatedStyle(() => {
     const raw =

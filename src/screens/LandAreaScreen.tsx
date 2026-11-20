@@ -28,6 +28,7 @@ import {
   polygonAreaM2,
   type LatLng,
 } from '../geo/areaMath';
+import { useLogMeasurementOnLeave } from '../history/useLogMeasurementOnLeave';
 import { colors, spacing } from '../theme';
 
 type Mode = 'manual' | 'gps';
@@ -151,6 +152,19 @@ export function LandAreaScreen() {
   const periM = useMemo(() => perimeterM(points), [points]);
   const areaFmt = formatArea(areaM2);
   const periFmt = formatLength(periM);
+
+  useLogMeasurementOnLeave('landArea', 'Land area', () => {
+    if (points.length < 3 || !(areaM2 > 0)) return null;
+    return {
+      summary: `${areaFmt.value} ${areaFmt.unit}`,
+      values: {
+        areaM2: Number(areaM2.toFixed(2)),
+        perimeterM: Number(periM.toFixed(2)),
+        points: points.length,
+        mode,
+      },
+    };
+  });
 
   const onMapPress = (e: MapPressEvent) => {
     if (mode !== 'manual' || tracking) return;

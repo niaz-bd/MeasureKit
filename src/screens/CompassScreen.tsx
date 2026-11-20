@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 
+import { useLogMeasurementOnLeave } from '../history/useLogMeasurementOnLeave';
 import { cardinalFromDeg, formatHeading } from '../sensors/heading';
 import { useSmoothedHeading } from '../sensors/useSmoothedHeading';
 import { colors, spacing } from '../theme';
@@ -37,6 +38,14 @@ export function CompassScreen() {
       return () => undefined;
     }, []),
   );
+
+  useLogMeasurementOnLeave('compass', 'Compass', () => {
+    if (available === false) return null;
+    return {
+      summary: `${formatHeading(headingDeg)} ${cardinalFromDeg(headingDeg)}`,
+      values: { headingDeg: Number(headingDeg.toFixed(1)) },
+    };
+  });
 
   // Rotate rose opposite to heading so N stays geographic north; top of screen = device heading.
   const roseStyle = useAnimatedStyle(() => ({

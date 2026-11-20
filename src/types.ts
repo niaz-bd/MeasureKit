@@ -3,6 +3,7 @@ export type RootStackParamList = {
   Measure: undefined;
   Calculator: undefined;
   UnitConverter: undefined;
+  MeasureHistory: undefined;
   ArMeasure: undefined;
   Level: undefined;
   Inclinometer: undefined;

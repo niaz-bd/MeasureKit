@@ -19,6 +19,7 @@ export type FeatureId =
   | 'ruler'
   | 'calculator'
   | 'unitConverter'
+  | 'measureHistory'
   | 'ar'
   | 'level'
   | 'inclinometer'
@@ -91,6 +92,14 @@ const FEATURE_PROBES: Probe[] = [
     title: 'Unit converter',
     subtitle: 'Length, area & more',
     icon: 'swap-horizontal',
+    check: async () => ({ available: true }),
+  },
+  {
+    id: 'measureHistory',
+    route: 'MeasureHistory',
+    title: 'History',
+    subtitle: 'Past measurements',
+    icon: 'history',
     check: async () => ({ available: true }),
   },
   {

@@ -24,6 +24,7 @@ import {
 } from '@reactvision/react-viro';
 
 import { GlowReadout } from '../components/GlowReadout';
+import { logMeasurement } from '../history/measureHistory';
 import { colors, spacing } from '../theme';
 import { formatMeasurement, unitLabel, type UnitSystem } from '../units';
 
@@ -199,6 +200,22 @@ export function ArMeasureNative({ unit, onOpenSettings }: ArMeasureNativeProps) 
   const [clearRequest, setClearRequest] = useState<ClearRequest | null>(null);
   const tapSeq = useRef(0);
   const clearSeq = useRef(0);
+  const loggedDistance = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (distanceMm == null || !(distanceMm > 0)) return;
+    if (loggedDistance.current != null && Math.abs(loggedDistance.current - distanceMm) < 0.5) {
+      return;
+    }
+    loggedDistance.current = distanceMm;
+    const summary = `${formatMeasurement(distanceMm, unit)} ${unitLabel(unit)}`;
+    logMeasurement({
+      toolId: 'ar',
+      toolName: 'AR measure',
+      summary,
+      values: { mm: Number(distanceMm.toFixed(3)), unit },
+    }).catch(() => undefined);
+  }, [distanceMm, unit]);
 
   const appProps = useMemo<AppProps>(
     () => ({
@@ -277,6 +294,7 @@ export function ArMeasureNative({ unit, onOpenSettings }: ArMeasureNativeProps) 
               clearSeq.current += 1;
               setClearRequest({ id: clearSeq.current });
               setDistanceMm(null);
+              loggedDistance.current = null;
             }}
           >
             <Text style={styles.actionText}>Clear</Text>
