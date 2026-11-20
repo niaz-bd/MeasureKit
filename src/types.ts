@@ -4,6 +4,7 @@ export type RootStackParamList = {
   Inclinometer: undefined;
   Compass: undefined;
   AngleMeter: undefined;
+  LandArea: undefined;
   Settings: undefined;
   Calibration: undefined;
   About: undefined;

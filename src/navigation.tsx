@@ -7,6 +7,7 @@ import { AngleMeterScreen } from './screens/AngleMeterScreen';
 import { CalibrationScreen } from './screens/CalibrationScreen';
 import { CompassScreen } from './screens/CompassScreen';
 import { InclinometerScreen } from './screens/InclinometerScreen';
+import { LandAreaScreen } from './screens/LandAreaScreen';
 import { LevelScreen } from './screens/LevelScreen';
 import { MeasureScreen } from './screens/MeasureScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
@@ -45,6 +46,7 @@ export function AppNavigator() {
         <Stack.Screen name="Inclinometer" component={InclinometerScreen} />
         <Stack.Screen name="Compass" component={CompassScreen} />
         <Stack.Screen name="AngleMeter" component={AngleMeterScreen} />
+        <Stack.Screen name="LandArea" component={LandAreaScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="Calibration" component={CalibrationScreen} />
         <Stack.Screen name="About" component={AboutScreen} />

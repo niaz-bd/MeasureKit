@@ -369,6 +369,17 @@ export function MeasureScreen() {
                 color={colors.teal}
               />
             </Pressable>
+            <Pressable
+              accessibilityLabel="Open land area calculator"
+              onPress={() => navigation.navigate('LandArea')}
+              style={styles.iconBtn}
+            >
+              <MaterialCommunityIcons
+                name="vector-polygon"
+                size={26}
+                color={colors.teal}
+              />
+            </Pressable>
           </View>
 
           <View style={styles.centerChrome}>
