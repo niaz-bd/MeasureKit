@@ -380,6 +380,17 @@ export function MeasureScreen() {
                 color={colors.teal}
               />
             </Pressable>
+            <Pressable
+              accessibilityLabel="Open light meter"
+              onPress={() => navigation.navigate('LightMeter')}
+              style={styles.iconBtn}
+            >
+              <MaterialCommunityIcons
+                name="white-balance-sunny"
+                size={26}
+                color={colors.teal}
+              />
+            </Pressable>
           </View>
 
           <View style={styles.centerChrome}>
