@@ -1,6 +1,6 @@
-# Visual Ruler
+# MeasureKit
 
-Android-first on-screen + AR ruler built with Expo + React Native (SDK 58).
+Android-first measure toolkit (on-screen + AR ruler and more) built with Expo + React Native (SDK 58).
 
 - **On-screen:** back-camera viewfinder + dual full-height bars (gap = length); density + credit-card calibration
 - **AR:** ViroReact / ARCore — tap two plane points for real-world distance (same cm/inch units). **Not in Expo Go.**
@@ -17,10 +17,10 @@ AR UX: switch to **AR** → move phone to detect a plane → **tap** (or **Place
 ## Why “no app on this device can handle it”?
 
 This project includes **`expo-dev-client`** and **`react-native-google-mobile-ads`**.  
-Default `npx expo start` QR / links open a **custom development-build scheme** (`exp+visual-ruler://…`). Android shows that error when:
+Default `npx expo start` QR / links open a **custom development-build scheme** (`exp+measurekit://…`). Android shows that error when:
 
 1. Expo Go is missing **or**
-2. The custom Visual Ruler native app is not installed (most common)
+2. The custom MeasureKit native app is not installed (most common)
 
 **AdMob is not in Expo Go.** Full ads require a native install via USB.
 
@@ -66,7 +66,7 @@ That prebuilds native code, installs `com.visualruler.app`, and starts Metro. La
 npx expo start
 ```
 
-…then open the installed **Visual Ruler** app (not Expo Go).
+…then open the installed **MeasureKit** app (not Expo Go).
 
 ---
 

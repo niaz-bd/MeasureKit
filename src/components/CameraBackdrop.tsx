@@ -28,7 +28,7 @@ export function CameraBackdrop({ active = true }: Props) {
       <View style={[styles.fill, styles.denied]} accessibilityRole="alert">
         <Text style={styles.deniedTitle}>Camera access needed</Text>
         <Text style={styles.deniedBody}>
-          Visual Ruler overlays the ruler on your back camera so you can line up
+          MeasureKit overlays the ruler on your back camera so you can line up
           real objects. Measurement scale still uses screen density and your
           calibration — the camera is only a viewfinder.
         </Text>

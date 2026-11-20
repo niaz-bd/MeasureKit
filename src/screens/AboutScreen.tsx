@@ -18,10 +18,11 @@ export function AboutScreen() {
 
   return (
     <View style={[styles.root, { paddingTop: insets.top + spacing.md }]}>
-      <Text style={styles.title}>Visual Ruler</Text>
+      <Text style={styles.title}>MeasureKit</Text>
       <Text style={styles.body}>
-        On-screen physical ruler for Android. Lengths use your display density
-        and an optional credit-card calibration (ISO ID-1 long edge, 85.6 mm).
+        MeasureKit is a toolkit for Android: on-screen ruler, sensors, map
+        area, converters, and more. Ruler lengths use your display density and
+        an optional credit-card calibration (ISO ID-1 long edge, 85.6 mm).
       </Text>
       <Text style={styles.body}>
         Ads use Google AdMob test unit IDs in this build. Swap to production IDs

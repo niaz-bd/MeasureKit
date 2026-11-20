@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "Visual Ruler",
-    "slug": "visual-ruler",
+    "name": "MeasureKit",
+    "slug": "measurekit",
     "version": "1.0.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "scheme": "visual-ruler",
+    "scheme": "measurekit",
     "androidStatusBar": {
       "hidden": true,
       "translucent": true,
@@ -16,13 +16,14 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.visualruler.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "Visual Ruler shows the back camera under the on-screen ruler so you can align real objects. Measurements use screen scale and calibration, not the camera image.",
-        "NSLocationWhenInUseUsageDescription": "Visual Ruler uses your location to show the map and to walk-track land boundaries for area measurement.",
-        "NSMicrophoneUsageDescription": "Visual Ruler uses the microphone to measure relative sound levels in the sound meter."
+        "NSCameraUsageDescription": "MeasureKit shows the back camera under the on-screen ruler so you can align real objects. Measurements use screen scale and calibration, not the camera image.",
+        "NSLocationWhenInUseUsageDescription": "MeasureKit uses your location to show the map and to walk-track land boundaries for area measurement.",
+        "NSMicrophoneUsageDescription": "MeasureKit uses the microphone to measure relative sound levels in the sound meter."
       }
     },
     "android": {
       "package": "com.visualruler.app",
+      "label": "MeasureKit",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.ACCESS_COARSE_LOCATION",
@@ -55,7 +56,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow Visual Ruler to use the camera as a live viewfinder under the ruler overlay.",
+          "cameraPermission": "Allow MeasureKit to use the camera as a live viewfinder under the ruler overlay.",
           "microphonePermission": false,
           "recordAudioAndroid": false
         }
@@ -63,7 +64,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Allow Visual Ruler to use your location for the land area map and GPS walk tracking.",
+          "locationWhenInUsePermission": "Allow MeasureKit to use your location for the land area map and GPS walk tracking.",
           "isIosBackgroundLocationEnabled": false,
           "isAndroidBackgroundLocationEnabled": false
         }
@@ -71,7 +72,7 @@
       [
         "expo-av",
         {
-          "microphonePermission": "Allow Visual Ruler to use the microphone for the sound meter."
+          "microphonePermission": "Allow MeasureKit to use the microphone for the sound meter."
         }
       ],
       [

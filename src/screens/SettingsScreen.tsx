@@ -85,7 +85,7 @@ export function SettingsScreen() {
       />
 
       <Text style={styles.section}>About</Text>
-      <Row label="About Visual Ruler" onPress={() => navigation.navigate('About')} />
+      <Row label="About MeasureKit" onPress={() => navigation.navigate('About')} />
 
       <View style={styles.ad}>
         <BannerAdSlot />

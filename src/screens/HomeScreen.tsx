@@ -50,7 +50,7 @@ export function HomeScreen() {
         },
       ]}
     >
-      <Text style={styles.brand}>Visual Ruler</Text>
+      <Text style={styles.brand}>MeasureKit</Text>
       <Text style={styles.tagline}>Choose a tool</Text>
 
       {features == null ? (
