@@ -5,6 +5,7 @@ import React from 'react';
 import { AboutScreen } from './screens/AboutScreen';
 import { AngleMeterScreen } from './screens/AngleMeterScreen';
 import { ArMeasureScreen } from './screens/ArMeasureScreen';
+import { CalculatorScreen } from './screens/CalculatorScreen';
 import { CalibrationScreen } from './screens/CalibrationScreen';
 import { CompassScreen } from './screens/CompassScreen';
 import { HomeScreen } from './screens/HomeScreen';
@@ -48,6 +49,7 @@ export function AppNavigator() {
       >
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Measure" component={MeasureScreen} />
+        <Stack.Screen name="Calculator" component={CalculatorScreen} />
         <Stack.Screen name="ArMeasure" component={ArMeasureScreen} />
         <Stack.Screen name="Level" component={LevelScreen} />
         <Stack.Screen name="Inclinometer" component={InclinometerScreen} />
