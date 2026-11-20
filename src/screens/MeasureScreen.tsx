@@ -336,6 +336,17 @@ export function MeasureScreen() {
                 color={colors.teal}
               />
             </Pressable>
+            <Pressable
+              accessibilityLabel="Open inclinometer"
+              onPress={() => navigation.navigate('Inclinometer')}
+              style={styles.iconBtn}
+            >
+              <MaterialCommunityIcons
+                name="angle-acute"
+                size={26}
+                color={colors.teal}
+              />
+            </Pressable>
           </View>
 
           <View style={styles.centerChrome}>
