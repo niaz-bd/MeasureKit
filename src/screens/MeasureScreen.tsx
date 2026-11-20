@@ -347,6 +347,17 @@ export function MeasureScreen() {
                 color={colors.teal}
               />
             </Pressable>
+            <Pressable
+              accessibilityLabel="Open compass"
+              onPress={() => navigation.navigate('Compass')}
+              style={styles.iconBtn}
+            >
+              <MaterialCommunityIcons
+                name="compass-outline"
+                size={26}
+                color={colors.teal}
+              />
+            </Pressable>
           </View>
 
           <View style={styles.centerChrome}>
