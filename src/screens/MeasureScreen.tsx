@@ -207,42 +207,43 @@ export function MeasureScreen() {
     setUnit(next).catch(() => undefined);
   };
 
-  const modeToggle = (
-    <View style={styles.modeToggle} pointerEvents="box-none">
-      <Pressable
-        style={[styles.modeBtn, mode === 'contact' && styles.modeBtnOn]}
-        onPress={() => setMode('contact')}
-      >
-        <Text style={[styles.modeText, mode === 'contact' && styles.modeTextOn]}>
-          On-screen
-        </Text>
-      </Pressable>
-      <Pressable
-        style={[styles.modeBtn, mode === 'ar' && styles.modeBtnOn]}
-        onPress={() => setMode('ar')}
-      >
-        <Text style={[styles.modeText, mode === 'ar' && styles.modeTextOn]}>
-          AR
-        </Text>
-      </Pressable>
-    </View>
-  );
-
-  const unitToggle = (
-    <View style={styles.unitToggle} pointerEvents="box-none">
-      {(['cm', 'inch'] as UnitSystem[]).map((u) => (
+  const topControls = (
+    <View style={styles.topControls} pointerEvents="box-none">
+      <View style={styles.modeToggle}>
         <Pressable
-          key={u}
-          accessibilityLabel={`Use ${u === 'cm' ? 'centimetres' : 'inches'}`}
-          accessibilityState={{ selected: unit === u }}
-          style={[styles.unitBtn, unit === u && styles.unitBtnOn]}
-          onPress={() => pickUnit(u)}
+          style={[styles.modeBtn, mode === 'contact' && styles.modeBtnOn]}
+          onPress={() => setMode('contact')}
         >
-          <Text style={[styles.unitText, unit === u && styles.unitTextOn]}>
-            {u === 'cm' ? 'cm' : 'in'}
+          <Text
+            style={[styles.modeText, mode === 'contact' && styles.modeTextOn]}
+          >
+            On-screen
           </Text>
         </Pressable>
-      ))}
+        <Pressable
+          style={[styles.modeBtn, mode === 'ar' && styles.modeBtnOn]}
+          onPress={() => setMode('ar')}
+        >
+          <Text style={[styles.modeText, mode === 'ar' && styles.modeTextOn]}>
+            AR
+          </Text>
+        </Pressable>
+      </View>
+      <View style={styles.unitToggle}>
+        {(['cm', 'inch'] as UnitSystem[]).map((u) => (
+          <Pressable
+            key={u}
+            accessibilityLabel={`Use ${u === 'cm' ? 'centimetres' : 'inches'}`}
+            accessibilityState={{ selected: unit === u }}
+            style={[styles.unitBtn, unit === u && styles.unitBtnOn]}
+            onPress={() => pickUnit(u)}
+          >
+            <Text style={[styles.unitText, unit === u && styles.unitTextOn]}>
+              {u === 'cm' ? 'cm' : 'in'}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
     </View>
   );
 
@@ -255,8 +256,7 @@ export function MeasureScreen() {
           onBackToContact={() => setMode('contact')}
         />
         <View style={styles.arModeSlot} pointerEvents="box-none">
-          {modeToggle}
-          {unitToggle}
+          {topControls}
         </View>
       </View>
     );
@@ -326,8 +326,7 @@ export function MeasureScreen() {
           </Pressable>
 
           <View style={styles.centerChrome}>
-            {modeToggle}
-            {unitToggle}
+            {topControls}
             <GlowReadout value={readout} unit={unitLabel(unit)} />
           </View>
 
@@ -416,17 +415,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 20,
   },
+  topControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexWrap: 'nowrap',
+    gap: spacing.sm,
+    zIndex: 5,
+  },
   modeToggle: {
     flexDirection: 'row',
-    alignSelf: 'center',
+    flexShrink: 0,
     backgroundColor: 'rgba(42, 48, 56, 0.82)',
     borderRadius: 12,
     padding: 3,
     gap: 2,
-    zIndex: 5,
   },
   modeBtn: {
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 10,
   },
@@ -443,19 +449,19 @@ const styles = StyleSheet.create({
   },
   unitToggle: {
     flexDirection: 'row',
-    alignSelf: 'center',
+    flexShrink: 0,
     backgroundColor: 'rgba(42, 48, 56, 0.82)',
-    borderRadius: 10,
-    padding: 2,
+    borderRadius: 12,
+    padding: 3,
     gap: 2,
-    marginTop: 4,
   },
   unitBtn: {
-    minWidth: 40,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
+    minWidth: 44,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   unitBtnOn: {
     backgroundColor: colors.teal,
@@ -463,7 +469,7 @@ const styles = StyleSheet.create({
   unitText: {
     color: colors.textMuted,
     fontWeight: '700',
-    fontSize: 12,
+    fontSize: 13,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
   },
