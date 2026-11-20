@@ -26,6 +26,7 @@ import { useSettings } from '../SettingsContext';
 import { colors, spacing } from '../theme';
 import type { RootStackParamList } from '../types';
 import {
+  UnitSystem,
   dpToMm,
   formatMeasurement,
   mmToDp,
@@ -45,7 +46,7 @@ export function MeasureScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const insets = useSafeAreaInsets();
-  const { unit, calibration } = useSettings();
+  const { unit, setUnit, calibration } = useSettings();
   const [mode, setMode] = useState<MeasureMode>('contact');
   const [trackWidth, setTrackWidth] = useState(0);
   const [fineMode, setFineMode] = useState(false);
@@ -202,6 +203,10 @@ export function MeasureScreen() {
   // Immersive mode hides system bars — keep a tiny pad only if insets remain.
   const bottomPad = Math.max(insets.bottom > 24 ? 0 : insets.bottom, 0);
 
+  const pickUnit = (next: UnitSystem) => {
+    setUnit(next).catch(() => undefined);
+  };
+
   const modeToggle = (
     <View style={styles.modeToggle} pointerEvents="box-none">
       <Pressable
@@ -223,6 +228,24 @@ export function MeasureScreen() {
     </View>
   );
 
+  const unitToggle = (
+    <View style={styles.unitToggle} pointerEvents="box-none">
+      {(['cm', 'inch'] as UnitSystem[]).map((u) => (
+        <Pressable
+          key={u}
+          accessibilityLabel={`Use ${u === 'cm' ? 'centimetres' : 'inches'}`}
+          accessibilityState={{ selected: unit === u }}
+          style={[styles.unitBtn, unit === u && styles.unitBtnOn]}
+          onPress={() => pickUnit(u)}
+        >
+          <Text style={[styles.unitText, unit === u && styles.unitTextOn]}>
+            {u === 'cm' ? 'cm' : 'in'}
+          </Text>
+        </Pressable>
+      ))}
+    </View>
+  );
+
   if (mode === 'ar') {
     return (
       <View style={styles.root}>
@@ -233,6 +256,7 @@ export function MeasureScreen() {
         />
         <View style={styles.arModeSlot} pointerEvents="box-none">
           {modeToggle}
+          {unitToggle}
         </View>
       </View>
     );
@@ -303,6 +327,7 @@ export function MeasureScreen() {
 
           <View style={styles.centerChrome}>
             {modeToggle}
+            {unitToggle}
             <GlowReadout value={readout} unit={unitLabel(unit)} />
           </View>
 
@@ -414,6 +439,35 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   modeTextOn: {
+    color: colors.graphite,
+  },
+  unitToggle: {
+    flexDirection: 'row',
+    alignSelf: 'center',
+    backgroundColor: 'rgba(42, 48, 56, 0.82)',
+    borderRadius: 10,
+    padding: 2,
+    gap: 2,
+    marginTop: 4,
+  },
+  unitBtn: {
+    minWidth: 40,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  unitBtnOn: {
+    backgroundColor: colors.teal,
+  },
+  unitText: {
+    color: colors.textMuted,
+    fontWeight: '700',
+    fontSize: 12,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  unitTextOn: {
     color: colors.graphite,
   },
   iconBtn: {
