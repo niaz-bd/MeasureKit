@@ -1,5 +1,6 @@
 import type { ComponentProps } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Audio } from 'expo-av';
 import { CameraView } from 'expo-camera';
 import * as Location from 'expo-location';
 import {
@@ -23,6 +24,7 @@ export type FeatureId =
   | 'angleMeter'
   | 'landArea'
   | 'lightMeter'
+  | 'soundMeter'
   | 'settings';
 
 export type FeatureCapability = {
@@ -166,6 +168,31 @@ const FEATURE_PROBES: Probe[] = [
         available: false,
         reason: 'No light sensor or camera on this device',
       };
+    },
+  },
+  {
+    id: 'soundMeter',
+    route: 'SoundMeter',
+    title: 'Sound meter',
+    subtitle: 'Live dB level',
+    icon: 'microphone-outline',
+    check: async () => {
+      if (Platform.OS === 'web') {
+        return {
+          available: false,
+          reason: 'Microphone metering not supported on web',
+        };
+      }
+      try {
+        // Probe audio permission API — does not prompt; confirms mic stack exists.
+        await Audio.getPermissionsAsync();
+        return { available: true };
+      } catch {
+        return {
+          available: false,
+          reason: 'Microphone not available on this device',
+        };
+      }
     },
   },
   {

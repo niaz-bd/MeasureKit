@@ -17,7 +17,8 @@
       "bundleIdentifier": "com.visualruler.app",
       "infoPlist": {
         "NSCameraUsageDescription": "Visual Ruler shows the back camera under the on-screen ruler so you can align real objects. Measurements use screen scale and calibration, not the camera image.",
-        "NSLocationWhenInUseUsageDescription": "Visual Ruler uses your location to show the map and to walk-track land boundaries for area measurement."
+        "NSLocationWhenInUseUsageDescription": "Visual Ruler uses your location to show the map and to walk-track land boundaries for area measurement.",
+        "NSMicrophoneUsageDescription": "Visual Ruler uses the microphone to measure relative sound levels in the sound meter."
       }
     },
     "android": {
@@ -25,7 +26,8 @@
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION"
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.RECORD_AUDIO"
       ],
       "adaptiveIcon": {
         "backgroundColor": "#2A3038",
@@ -64,6 +66,12 @@
           "locationWhenInUsePermission": "Allow Visual Ruler to use your location for the land area map and GPS walk tracking.",
           "isIosBackgroundLocationEnabled": false,
           "isAndroidBackgroundLocationEnabled": false
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow Visual Ruler to use the microphone for the sound meter."
         }
       ],
       [

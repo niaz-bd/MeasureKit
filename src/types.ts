@@ -8,6 +8,7 @@ export type RootStackParamList = {
   AngleMeter: undefined;
   LandArea: undefined;
   LightMeter: undefined;
+  SoundMeter: undefined;
   Settings: undefined;
   Calibration: undefined;
   About: undefined;
