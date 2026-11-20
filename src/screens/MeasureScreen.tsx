@@ -202,10 +202,54 @@ export function MeasureScreen() {
     <View style={styles.root}>
       <CameraBackdrop />
 
-      <View
-        style={[styles.overlay, { paddingTop: Math.max(insets.top, 8) }]}
-      >
-        <View style={styles.chrome}>
+      <View style={styles.overlay} onLayout={onStageLayout}>
+        {/* Full viewport-height measure bars (edge to edge vertically). */}
+        <GestureDetector gesture={panLeft}>
+          <Animated.View
+            style={[styles.barHit, leftStyle]}
+            accessibilityLabel="Left measure bar"
+            accessibilityRole="adjustable"
+          >
+            <View
+              style={[
+                styles.barStem,
+                activeBar === 'left' && styles.barStemActive,
+              ]}
+            />
+            <View
+              style={[
+                styles.barKnob,
+                activeBar === 'left' && styles.barKnobActive,
+              ]}
+            />
+          </Animated.View>
+        </GestureDetector>
+
+        <GestureDetector gesture={panRight}>
+          <Animated.View
+            style={[styles.barHit, rightStyle]}
+            accessibilityLabel="Right measure bar"
+            accessibilityRole="adjustable"
+          >
+            <View
+              style={[
+                styles.barStem,
+                activeBar === 'right' && styles.barStemActive,
+              ]}
+            />
+            <View
+              style={[
+                styles.barKnob,
+                activeBar === 'right' && styles.barKnobActive,
+              ]}
+            />
+          </Animated.View>
+        </GestureDetector>
+
+        <View
+          style={[styles.chrome, { paddingTop: Math.max(insets.top, 8) }]}
+          pointerEvents="box-none"
+        >
           <Pressable
             accessibilityLabel="Open settings"
             onPress={() => navigation.navigate('Settings')}
@@ -220,7 +264,7 @@ export function MeasureScreen() {
 
           <GlowReadout value={readout} unit={unitLabel(unit)} />
 
-          <View style={styles.fineCluster}>
+          <View style={styles.fineCluster} pointerEvents="box-none">
             <Pressable
               accessibilityLabel={
                 fineMode ? 'Disable fine adjust' : 'Enable fine adjust (turtle)'
@@ -257,59 +301,15 @@ export function MeasureScreen() {
           </View>
         </View>
 
-        <View style={styles.stage} onLayout={onStageLayout}>
-          <GestureDetector gesture={panLeft}>
-            <Animated.View
-              style={[styles.barHit, leftStyle]}
-              accessibilityLabel="Left measure bar"
-              accessibilityRole="adjustable"
-            >
-              <View
-                style={[
-                  styles.barStem,
-                  activeBar === 'left' && styles.barStemActive,
-                ]}
-              />
-              <View
-                style={[
-                  styles.barKnob,
-                  activeBar === 'left' && styles.barKnobActive,
-                ]}
-              />
-            </Animated.View>
-          </GestureDetector>
-
-          <GestureDetector gesture={panRight}>
-            <Animated.View
-              style={[styles.barHit, rightStyle]}
-              accessibilityLabel="Right measure bar"
-              accessibilityRole="adjustable"
-            >
-              <View
-                style={[
-                  styles.barStem,
-                  activeBar === 'right' && styles.barStemActive,
-                ]}
-              />
-              <View
-                style={[
-                  styles.barKnob,
-                  activeBar === 'right' && styles.barKnobActive,
-                ]}
-              />
-            </Animated.View>
-          </GestureDetector>
-
-          <View
-            style={[styles.rulerEdge, { paddingBottom: bottomPad }]}
-            pointerEvents="none"
-          >
-            <RulerTrack
-              width={trackWidth}
-              mmPerDp={calibration.mmPerDp}
-              unit={unit}
-            />
-          </View>
+        <View
+          style={[styles.rulerEdge, { paddingBottom: bottomPad }]}
+          pointerEvents="none"
+        >
+          <RulerTrack
+            width={trackWidth}
+            mmPerDp={calibration.mmPerDp}
+            unit={unit}
+          />
         </View>
       </View>
     </View>
@@ -323,19 +323,19 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
+    position: 'relative',
   },
   chrome: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,
-    zIndex: 2,
-  },
-  stage: {
-    flex: 1,
-    position: 'relative',
-    marginTop: spacing.sm,
+    zIndex: 4,
   },
   iconBtn: {
     width: 48,
@@ -375,14 +375,17 @@ const styles = StyleSheet.create({
   barHit: {
     position: 'absolute',
     top: 0,
-    bottom: 72,
+    bottom: 0,
     width: BAR_HIT,
     alignItems: 'center',
+    justifyContent: 'center',
     zIndex: 3,
   },
   barStem: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
     width: 2,
-    flex: 1,
     backgroundColor: colors.teal,
     opacity: 0.75,
   },
@@ -391,13 +394,13 @@ const styles = StyleSheet.create({
     width: 3,
   },
   barKnob: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    marginBottom: 4,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     backgroundColor: colors.tealDim,
     borderWidth: 2,
     borderColor: colors.white,
+    zIndex: 1,
   },
   barKnobActive: {
     backgroundColor: colors.teal,
@@ -407,5 +410,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+    zIndex: 2,
   },
 });
