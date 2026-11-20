@@ -1,8 +1,10 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Picker } from '@react-native-picker/picker';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -52,7 +54,12 @@ export function UnitConverterScreen() {
 
   const numeric = useMemo(() => {
     const cleaned = input.replace(',', '.').trim();
-    if (cleaned === '' || cleaned === '-' || cleaned === '.' || cleaned === '-.') {
+    if (
+      cleaned === '' ||
+      cleaned === '-' ||
+      cleaned === '.' ||
+      cleaned === '-.'
+    ) {
       return null;
     }
     const n = Number(cleaned);
@@ -87,36 +94,50 @@ export function UnitConverterScreen() {
       </View>
 
       <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.catRow}
-      >
-        {CONVERT_CATEGORIES.map((c) => (
-          <Pressable
-            key={c.id}
-            onPress={() => onPickCategory(c.id)}
-            style={[styles.catChip, category === c.id && styles.catChipOn]}
-          >
-            <Text
-              style={[styles.catText, category === c.id && styles.catTextOn]}
-            >
-              {c.title}
-            </Text>
-          </Pressable>
-        ))}
-      </ScrollView>
-
-      <ScrollView
         style={styles.body}
         contentContainerStyle={styles.bodyContent}
         keyboardShouldPersistTaps="handled"
       >
+        <Text style={styles.fieldLabel}>Category</Text>
+        <View style={styles.pickerWrap}>
+          <Picker
+            selectedValue={category}
+            onValueChange={(v) => onPickCategory(v as ConvertCategory)}
+            style={styles.picker}
+            dropdownIconColor={colors.teal}
+            mode="dropdown"
+          >
+            {CONVERT_CATEGORIES.map((c) => (
+              <Picker.Item
+                key={c.id}
+                label={c.title}
+                value={c.id}
+                color={Platform.OS === 'android' ? colors.text : undefined}
+              />
+            ))}
+          </Picker>
+        </View>
+
         <Text style={styles.fieldLabel}>From</Text>
-        <UnitPicker
-          units={cat.units}
-          selected={fromId}
-          onSelect={setFromId}
-        />
+        <View style={styles.pickerWrap}>
+          <Picker
+            selectedValue={fromId}
+            onValueChange={(v) => setFromId(String(v))}
+            style={styles.picker}
+            dropdownIconColor={colors.teal}
+            mode="dropdown"
+          >
+            {cat.units.map((u) => (
+              <Picker.Item
+                key={u.id}
+                label={u.label}
+                value={u.id}
+                color={Platform.OS === 'android' ? colors.text : undefined}
+              />
+            ))}
+          </Picker>
+        </View>
+
         <TextInput
           style={styles.input}
           value={input}
@@ -127,48 +148,45 @@ export function UnitConverterScreen() {
           accessibilityLabel="Value to convert"
         />
 
-        <Pressable style={styles.swapBtn} onPress={swap} accessibilityLabel="Swap units">
+        <Pressable
+          style={styles.swapBtn}
+          onPress={swap}
+          accessibilityLabel="Swap units"
+        >
           <MaterialCommunityIcons name="swap-vertical" size={22} color={colors.teal} />
           <Text style={styles.swapText}>Swap</Text>
         </Pressable>
 
         <Text style={styles.fieldLabel}>To</Text>
-        <UnitPicker units={cat.units} selected={toId} onSelect={setToId} />
+        <View style={styles.pickerWrap}>
+          <Picker
+            selectedValue={toId}
+            onValueChange={(v) => setToId(String(v))}
+            style={styles.picker}
+            dropdownIconColor={colors.teal}
+            mode="dropdown"
+          >
+            {cat.units.map((u) => (
+              <Picker.Item
+                key={u.id}
+                label={u.label}
+                value={u.id}
+                color={Platform.OS === 'android' ? colors.text : undefined}
+              />
+            ))}
+          </Picker>
+        </View>
+
         <View style={styles.outputBox}>
-          <Text style={styles.outputValue} numberOfLines={2} adjustsFontSizeToFit>
+          <Text
+            style={styles.outputValue}
+            numberOfLines={2}
+            adjustsFontSizeToFit
+          >
             {output}
           </Text>
         </View>
       </ScrollView>
-    </View>
-  );
-}
-
-function UnitPicker({
-  units,
-  selected,
-  onSelect,
-}: {
-  units: { id: string; label: string }[];
-  selected: string;
-  onSelect: (id: string) => void;
-}) {
-  return (
-    <View style={styles.unitGrid}>
-      {units.map((u) => {
-        const on = u.id === selected;
-        return (
-          <Pressable
-            key={u.id}
-            onPress={() => onSelect(u.id)}
-            style={[styles.unitChip, on && styles.unitChipOn]}
-          >
-            <Text style={[styles.unitChipText, on && styles.unitChipTextOn]}>
-              {u.label}
-            </Text>
-          </Pressable>
-        );
-      })}
     </View>
   );
 }
@@ -199,30 +217,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '600',
   },
-  catRow: {
-    gap: spacing.sm,
-    paddingBottom: spacing.md,
-  },
-  catChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 10,
-    backgroundColor: colors.graphiteSoft,
-    borderWidth: 1,
-    borderColor: colors.graphiteEdge,
-  },
-  catChipOn: {
-    borderColor: colors.teal,
-    backgroundColor: colors.tealSoft,
-  },
-  catText: {
-    color: colors.textMuted,
-    fontWeight: '600',
-    fontSize: 13,
-  },
-  catTextOn: {
-    color: colors.teal,
-  },
   body: {
     flex: 1,
   },
@@ -237,31 +231,17 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: spacing.sm,
   },
-  unitGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    marginBottom: spacing.md,
-  },
-  unitChip: {
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 10,
+  pickerWrap: {
     backgroundColor: colors.graphiteSoft,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: colors.graphiteEdge,
+    marginBottom: spacing.md,
+    overflow: 'hidden',
   },
-  unitChipOn: {
-    borderColor: colors.teal,
-    backgroundColor: colors.tealSoft,
-  },
-  unitChipText: {
-    color: colors.textMuted,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  unitChipTextOn: {
-    color: colors.teal,
+  picker: {
+    color: colors.text,
+    backgroundColor: colors.graphiteSoft,
   },
   input: {
     backgroundColor: colors.graphiteSoft,
