@@ -18,6 +18,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ArMeasurePanel } from '../ar/ArMeasurePanel';
 import { CameraBackdrop } from '../components/CameraBackdrop';
 import { GlowReadout } from '../components/GlowReadout';
 import { RulerTrack } from '../components/RulerTrack';
@@ -38,12 +39,14 @@ const COARSE_DRAG_FACTOR = 1;
 const FINE_DRAG_FACTOR = 0.22;
 
 type ActiveBar = 'left' | 'right';
+type MeasureMode = 'contact' | 'ar';
 
 export function MeasureScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const insets = useSafeAreaInsets();
   const { unit, calibration } = useSettings();
+  const [mode, setMode] = useState<MeasureMode>('contact');
   const [trackWidth, setTrackWidth] = useState(0);
   const [fineMode, setFineMode] = useState(false);
   const [displayMm, setDisplayMm] = useState(0);
@@ -199,12 +202,47 @@ export function MeasureScreen() {
   // Immersive mode hides system bars — keep a tiny pad only if insets remain.
   const bottomPad = Math.max(insets.bottom > 24 ? 0 : insets.bottom, 0);
 
+  const modeToggle = (
+    <View style={styles.modeToggle} pointerEvents="box-none">
+      <Pressable
+        style={[styles.modeBtn, mode === 'contact' && styles.modeBtnOn]}
+        onPress={() => setMode('contact')}
+      >
+        <Text style={[styles.modeText, mode === 'contact' && styles.modeTextOn]}>
+          On-screen
+        </Text>
+      </Pressable>
+      <Pressable
+        style={[styles.modeBtn, mode === 'ar' && styles.modeBtnOn]}
+        onPress={() => setMode('ar')}
+      >
+        <Text style={[styles.modeText, mode === 'ar' && styles.modeTextOn]}>
+          AR
+        </Text>
+      </Pressable>
+    </View>
+  );
+
+  if (mode === 'ar') {
+    return (
+      <View style={styles.root}>
+        <ArMeasurePanel
+          unit={unit}
+          onOpenSettings={() => navigation.navigate('Settings')}
+          onBackToContact={() => setMode('contact')}
+        />
+        <View style={styles.arModeSlot} pointerEvents="box-none">
+          {modeToggle}
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.root}>
       <CameraBackdrop />
 
       <View style={styles.overlay} onLayout={onStageLayout}>
-        {/* Full viewport-height measure bars (edge to edge vertically). */}
         <GestureDetector gesture={panLeft}>
           <Animated.View
             style={[styles.barHit, leftStyle]}
@@ -263,7 +301,10 @@ export function MeasureScreen() {
             />
           </Pressable>
 
-          <GlowReadout value={readout} unit={unitLabel(unit)} />
+          <View style={styles.centerChrome}>
+            {modeToggle}
+            <GlowReadout value={readout} unit={unitLabel(unit)} />
+          </View>
 
           <View style={styles.fineCluster} pointerEvents="box-none">
             <Pressable
@@ -337,6 +378,43 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,
     zIndex: 4,
+  },
+  centerChrome: {
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  arModeSlot: {
+    position: 'absolute',
+    top: spacing.sm,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 20,
+  },
+  modeToggle: {
+    flexDirection: 'row',
+    alignSelf: 'center',
+    backgroundColor: 'rgba(42, 48, 56, 0.82)',
+    borderRadius: 12,
+    padding: 3,
+    gap: 2,
+    zIndex: 5,
+  },
+  modeBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  modeBtnOn: {
+    backgroundColor: colors.teal,
+  },
+  modeText: {
+    color: colors.textMuted,
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  modeTextOn: {
+    color: colors.graphite,
   },
   iconBtn: {
     width: 48,

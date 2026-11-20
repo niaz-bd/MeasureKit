@@ -1,8 +1,18 @@
 # Visual Ruler
 
-Android-first on-screen ruler built with Expo + React Native (SDK 58).
+Android-first on-screen + AR ruler built with Expo + React Native (SDK 58).
 
-Back-camera full-bleed under the landscape ruler overlay. Scale still uses density + credit-card calibration (camera is a viewfinder only). Allow camera when prompted; deny shows a clear retry / Open settings state.
+- **On-screen:** back-camera viewfinder + dual full-height bars (gap = length); density + credit-card calibration
+- **AR:** ViroReact / ARCore — tap two plane points for real-world distance (same cm/inch units). **Not in Expo Go.**
+
+## AR testing
+
+| Path | On-screen | AR |
+|------|-----------|-----|
+| `npm run start:go` (Expo Go) | Yes | Gated message → use `run:android` |
+| `npx expo run:android` | Yes | Yes (ARCore device / Play Services for AR) |
+
+AR UX: switch to **AR** → move phone to detect a plane → **tap** (or **Place** at crosshair) twice → readout shows distance → **Clear** to reset.
 
 ## Why “no app on this device can handle it”?
 

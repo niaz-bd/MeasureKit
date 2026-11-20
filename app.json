@@ -61,7 +61,15 @@
           "enforceContrast": false
         }
       ],
-      "expo-system-ui"
+      "expo-system-ui",
+      [
+        "@reactvision/react-viro",
+        {
+          "android": {
+            "xRMode": "AR"
+          }
+        }
+      ]
     ]
   }
 }
