@@ -4,7 +4,6 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -22,6 +21,47 @@ import {
   type ConvertCategory,
 } from '../convert/units';
 import { colors, spacing } from '../theme';
+
+/** Android dropdown menus are light; use dark labels for contrast. */
+const PICKER_SURFACE = '#F4F6F8';
+const PICKER_TEXT = '#1A1F26';
+
+function Dropdown({
+  selectedValue,
+  onValueChange,
+  items,
+  accessibilityLabel,
+}: {
+  selectedValue: string;
+  onValueChange: (value: string) => void;
+  items: { label: string; value: string }[];
+  accessibilityLabel: string;
+}) {
+  return (
+    <View style={styles.pickerWrap}>
+      <Picker
+        selectedValue={selectedValue}
+        onValueChange={(v) => onValueChange(String(v))}
+        style={styles.picker}
+        dropdownIconColor={PICKER_TEXT}
+        mode="dropdown"
+        accessibilityLabel={accessibilityLabel}
+        // iOS wheel / selected row
+        itemStyle={styles.pickerItemIos}
+      >
+        {items.map((item) => (
+          <Picker.Item
+            key={item.value}
+            label={item.label}
+            value={item.value}
+            // Android closed + open list both honor this color against light menus.
+            color={PICKER_TEXT}
+          />
+        ))}
+      </Picker>
+    </View>
+  );
+}
 
 export function UnitConverterScreen() {
   const navigation = useNavigation();
@@ -99,44 +139,23 @@ export function UnitConverterScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <Text style={styles.fieldLabel}>Category</Text>
-        <View style={styles.pickerWrap}>
-          <Picker
-            selectedValue={category}
-            onValueChange={(v) => onPickCategory(v as ConvertCategory)}
-            style={styles.picker}
-            dropdownIconColor={colors.teal}
-            mode="dropdown"
-          >
-            {CONVERT_CATEGORIES.map((c) => (
-              <Picker.Item
-                key={c.id}
-                label={c.title}
-                value={c.id}
-                color={Platform.OS === 'android' ? colors.text : undefined}
-              />
-            ))}
-          </Picker>
-        </View>
+        <Dropdown
+          selectedValue={category}
+          onValueChange={(v) => onPickCategory(v as ConvertCategory)}
+          items={CONVERT_CATEGORIES.map((c) => ({
+            label: c.title,
+            value: c.id,
+          }))}
+          accessibilityLabel="Category"
+        />
 
         <Text style={styles.fieldLabel}>From</Text>
-        <View style={styles.pickerWrap}>
-          <Picker
-            selectedValue={fromId}
-            onValueChange={(v) => setFromId(String(v))}
-            style={styles.picker}
-            dropdownIconColor={colors.teal}
-            mode="dropdown"
-          >
-            {cat.units.map((u) => (
-              <Picker.Item
-                key={u.id}
-                label={u.label}
-                value={u.id}
-                color={Platform.OS === 'android' ? colors.text : undefined}
-              />
-            ))}
-          </Picker>
-        </View>
+        <Dropdown
+          selectedValue={fromId}
+          onValueChange={setFromId}
+          items={cat.units.map((u) => ({ label: u.label, value: u.id }))}
+          accessibilityLabel="From unit"
+        />
 
         <TextInput
           style={styles.input}
@@ -158,24 +177,12 @@ export function UnitConverterScreen() {
         </Pressable>
 
         <Text style={styles.fieldLabel}>To</Text>
-        <View style={styles.pickerWrap}>
-          <Picker
-            selectedValue={toId}
-            onValueChange={(v) => setToId(String(v))}
-            style={styles.picker}
-            dropdownIconColor={colors.teal}
-            mode="dropdown"
-          >
-            {cat.units.map((u) => (
-              <Picker.Item
-                key={u.id}
-                label={u.label}
-                value={u.id}
-                color={Platform.OS === 'android' ? colors.text : undefined}
-              />
-            ))}
-          </Picker>
-        </View>
+        <Dropdown
+          selectedValue={toId}
+          onValueChange={setToId}
+          items={cat.units.map((u) => ({ label: u.label, value: u.id }))}
+          accessibilityLabel="To unit"
+        />
 
         <View style={styles.outputBox}>
           <Text
@@ -232,7 +239,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   pickerWrap: {
-    backgroundColor: colors.graphiteSoft,
+    backgroundColor: PICKER_SURFACE,
     borderRadius: 14,
     borderWidth: 1,
     borderColor: colors.graphiteEdge,
@@ -240,8 +247,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   picker: {
-    color: colors.text,
-    backgroundColor: colors.graphiteSoft,
+    color: PICKER_TEXT,
+    backgroundColor: PICKER_SURFACE,
+  },
+  pickerItemIos: {
+    color: PICKER_TEXT,
+    fontSize: 16,
   },
   input: {
     backgroundColor: colors.graphiteSoft,
