@@ -1,6 +1,5 @@
 import type { ComponentProps } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Audio } from 'expo-av';
 import { CameraView } from 'expo-camera';
 import * as Location from 'expo-location';
 import {
@@ -11,6 +10,7 @@ import {
 import { Platform } from 'react-native';
 
 import { canUseArMeasure, isExpoGo } from './ar/arAvailability';
+import { hasExponentAv } from './av/avAvailability';
 import type { RootStackParamList } from './types';
 
 export type FeatureRoute = keyof RootStackParamList;
@@ -183,16 +183,14 @@ const FEATURE_PROBES: Probe[] = [
           reason: 'Microphone metering not supported on web',
         };
       }
-      try {
-        // Probe audio permission API — does not prompt; confirms mic stack exists.
-        await Audio.getPermissionsAsync();
-        return { available: true };
-      } catch {
+      // Do not import expo-av here — missing ExponentAV crashes the bundle.
+      if (!hasExponentAv()) {
         return {
           available: false,
-          reason: 'Microphone not available on this device',
+          reason: 'expo-av (ExponentAV) not in this runtime',
         };
       }
+      return { available: true };
     },
   },
   {

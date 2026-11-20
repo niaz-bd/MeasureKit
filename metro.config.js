@@ -13,6 +13,7 @@ const stubNativeExtras =
 if (stubNativeExtras) {
   const admobStub = path.resolve(__dirname, 'src/admobStub.js');
   const viroStub = path.resolve(__dirname, 'src/ar/viroStub.js');
+  const avStub = path.resolve(__dirname, 'src/av/expoAvStub.js');
   const upstream = config.resolver.resolveRequest;
   config.resolver.resolveRequest = (context, moduleName, platform) => {
     if (moduleName === 'react-native-google-mobile-ads') {
@@ -23,6 +24,10 @@ if (stubNativeExtras) {
       moduleName.startsWith('@reactvision/react-viro/')
     ) {
       return { filePath: viroStub, type: 'sourceFile' };
+    }
+    // expo-av may be missing from some Expo Go runtimes (ExponentAV).
+    if (moduleName === 'expo-av' || moduleName.startsWith('expo-av/')) {
+      return { filePath: avStub, type: 'sourceFile' };
     }
     if (typeof upstream === 'function') {
       return upstream(context, moduleName, platform);

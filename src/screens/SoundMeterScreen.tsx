@@ -1,10 +1,11 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { Audio } from 'expo-av';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import React, { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { hasExponentAv } from '../av/avAvailability';
+import { loadExpoAvAudio } from '../av/loadExpoAv';
 import {
   dbToBar,
   formatDb,
@@ -15,14 +16,21 @@ import { colors, spacing } from '../theme';
 
 export function SoundMeterScreen() {
   const navigation = useNavigation();
-  const [active, setActive] = useState(true);
-  const { ready, permissionDenied, db, peakDb, error, resetPeak } =
-    useSmoothedDb(active);
+  const [active, setActive] = useState(() => hasExponentAv());
+  const {
+    ready,
+    permissionDenied,
+    nativeMissing,
+    db,
+    peakDb,
+    error,
+    resetPeak,
+  } = useSmoothedDb(active);
 
   useFocusEffect(
     useCallback(() => {
       ScreenOrientation.unlockAsync().catch(() => undefined);
-      setActive(true);
+      setActive(hasExponentAv());
       return () => {
         setActive(false);
       };
@@ -30,6 +38,8 @@ export function SoundMeterScreen() {
   );
 
   const requestMicAgain = async () => {
+    const Audio = loadExpoAvAudio();
+    if (!Audio) return;
     const perm = await Audio.requestPermissionsAsync();
     if (perm.granted) {
       setActive(false);
@@ -57,7 +67,18 @@ export function SoundMeterScreen() {
         </Pressable>
       </View>
 
-      {permissionDenied ? (
+      {nativeMissing || !hasExponentAv() ? (
+        <View style={styles.centered}>
+          <Text style={styles.body}>
+            Sound meter needs the expo-av native module (ExponentAV). It is not
+            available in this runtime (for example some Expo Go builds).
+          </Text>
+          <Text style={styles.code}>npx expo run:android</Text>
+          <Pressable style={styles.btn} onPress={() => navigation.goBack()}>
+            <Text style={styles.btnText}>Back to menu</Text>
+          </Pressable>
+        </View>
+      ) : permissionDenied ? (
         <View style={styles.centered}>
           <Text style={styles.body}>Microphone access is required.</Text>
           <Pressable style={styles.btn} onPress={requestMicAgain}>
@@ -98,7 +119,6 @@ export function SoundMeterScreen() {
 
           <Text style={styles.hint}>
             Relative level from the device mic (not a calibrated SPL meter).
-            Keep the phone away from speakers for best results.
           </Text>
         </View>
       )}
@@ -138,11 +158,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.md,
+    paddingHorizontal: spacing.md,
   },
   body: {
     color: colors.textMuted,
     textAlign: 'center',
     fontSize: 15,
+    lineHeight: 22,
+  },
+  code: {
+    color: colors.teal,
+    fontFamily: 'monospace',
+    fontSize: 14,
   },
   stage: {
     flex: 1,
