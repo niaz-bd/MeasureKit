@@ -31,10 +31,13 @@ import {
   unitLabel,
 } from '../units';
 
-const HANDLE_HIT = 44;
+const BAR_HIT = 48;
+const MIN_GAP_DP = 8;
 const FINE_STEP_MM = 0.1;
 const COARSE_DRAG_FACTOR = 1;
 const FINE_DRAG_FACTOR = 0.22;
+
+type ActiveBar = 'left' | 'right';
 
 export function MeasureScreen() {
   const navigation =
@@ -44,12 +47,16 @@ export function MeasureScreen() {
   const [trackWidth, setTrackWidth] = useState(0);
   const [fineMode, setFineMode] = useState(false);
   const [displayMm, setDisplayMm] = useState(0);
-  const handleX = useSharedValue(0);
-  const startX = useSharedValue(0);
+  const [activeBar, setActiveBar] = useState<ActiveBar>('right');
+
+  const leftX = useSharedValue(0);
+  const rightX = useSharedValue(0);
+  const startLeft = useSharedValue(0);
+  const startRight = useSharedValue(0);
   const fineModeSV = useSharedValue(0);
   const widthSV = useSharedValue(0);
-  const mmPerDpSV = useSharedValue(calibration.mmPerDp);
   const holdTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const initialized = useRef(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -63,62 +70,114 @@ export function MeasureScreen() {
   );
 
   useEffect(() => {
-    mmPerDpSV.value = calibration.mmPerDp;
-  }, [calibration.mmPerDp, mmPerDpSV]);
-
-  useEffect(() => {
     fineModeSV.value = fineMode ? 1 : 0;
   }, [fineMode, fineModeSV]);
 
-  const syncDisplay = useCallback(
-    (x: number) => {
-      setDisplayMm(dpToMm(Math.max(0, x), calibration.mmPerDp));
+  const syncFromBars = useCallback(
+    (left: number, right: number) => {
+      const gap = Math.max(0, right - left);
+      setDisplayMm(dpToMm(gap, calibration.mmPerDp));
     },
     [calibration.mmPerDp],
   );
 
-  const onTrackLayout = (e: LayoutChangeEvent) => {
+  const onStageLayout = (e: LayoutChangeEvent) => {
     const w = e.nativeEvent.layout.width;
     setTrackWidth(w);
     widthSV.value = w;
-    if (handleX.value <= 0 || handleX.value > w) {
-      const initial = Math.min(w * 0.35, mmToDp(50, calibration.mmPerDp));
-      handleX.value = initial;
-      syncDisplay(initial);
+    if (!initialized.current && w > 0) {
+      initialized.current = true;
+      const span = Math.min(w * 0.4, mmToDp(50, calibration.mmPerDp));
+      const mid = w / 2;
+      const l = Math.max(0, mid - span / 2);
+      const r = Math.min(w, mid + span / 2);
+      leftX.value = l;
+      rightX.value = r;
+      syncFromBars(l, r);
     }
   };
 
-  const pan = useMemo(
+  const markActive = useCallback((bar: ActiveBar) => {
+    setActiveBar(bar);
+  }, []);
+
+  const panLeft = useMemo(
     () =>
       Gesture.Pan()
         .onBegin(() => {
-          startX.value = handleX.value;
+          startLeft.value = leftX.value;
+          runOnJS(markActive)('left');
         })
         .onUpdate((e) => {
           const factor =
             fineModeSV.value > 0 ? FINE_DRAG_FACTOR : COARSE_DRAG_FACTOR;
+          const max = rightX.value - MIN_GAP_DP;
           const next = Math.min(
-            Math.max(0, startX.value + e.translationX * factor),
-            widthSV.value,
+            Math.max(0, startLeft.value + e.translationX * factor),
+            max,
           );
-          handleX.value = next;
-          runOnJS(syncDisplay)(next);
+          leftX.value = next;
+          runOnJS(syncFromBars)(next, rightX.value);
         }),
-    [fineModeSV, handleX, startX, syncDisplay, widthSV],
+    [fineModeSV, leftX, markActive, rightX, startLeft, syncFromBars],
   );
 
-  const handleStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: handleX.value - HANDLE_HIT / 2 }],
+  const panRight = useMemo(
+    () =>
+      Gesture.Pan()
+        .onBegin(() => {
+          startRight.value = rightX.value;
+          runOnJS(markActive)('right');
+        })
+        .onUpdate((e) => {
+          const factor =
+            fineModeSV.value > 0 ? FINE_DRAG_FACTOR : COARSE_DRAG_FACTOR;
+          const min = leftX.value + MIN_GAP_DP;
+          const next = Math.min(
+            Math.max(min, startRight.value + e.translationX * factor),
+            widthSV.value,
+          );
+          rightX.value = next;
+          runOnJS(syncFromBars)(leftX.value, next);
+        }),
+    [fineModeSV, leftX, markActive, rightX, startRight, syncFromBars, widthSV],
+  );
+
+  const leftStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: leftX.value - BAR_HIT / 2 }],
+  }));
+
+  const rightStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: rightX.value - BAR_HIT / 2 }],
   }));
 
   const nudge = useCallback(
     (dir: -1 | 1) => {
       const delta = mmToDp(FINE_STEP_MM, calibration.mmPerDp) * dir;
-      const next = Math.min(Math.max(0, handleX.value + delta), trackWidth);
-      handleX.value = next;
-      syncDisplay(next);
+      if (activeBar === 'left') {
+        const next = Math.min(
+          Math.max(0, leftX.value + delta),
+          rightX.value - MIN_GAP_DP,
+        );
+        leftX.value = next;
+        syncFromBars(next, rightX.value);
+      } else {
+        const next = Math.min(
+          Math.max(leftX.value + MIN_GAP_DP, rightX.value + delta),
+          trackWidth,
+        );
+        rightX.value = next;
+        syncFromBars(leftX.value, next);
+      }
     },
-    [calibration.mmPerDp, handleX, syncDisplay, trackWidth],
+    [
+      activeBar,
+      calibration.mmPerDp,
+      leftX,
+      rightX,
+      syncFromBars,
+      trackWidth,
+    ],
   );
 
   const startHold = (dir: -1 | 1) => {
@@ -144,10 +203,7 @@ export function MeasureScreen() {
       <CameraBackdrop />
 
       <View
-        style={[
-          styles.overlay,
-          { paddingTop: Math.max(insets.top, 8) },
-        ]}
+        style={[styles.overlay, { paddingTop: Math.max(insets.top, 8) }]}
       >
         <View style={styles.chrome}>
           <Pressable
@@ -181,7 +237,7 @@ export function MeasureScreen() {
             {fineMode ? (
               <View style={styles.nudgeRow}>
                 <Pressable
-                  accessibilityLabel="Decrease by 0.1 millimetre"
+                  accessibilityLabel={`Nudge ${activeBar} bar left by 0.1 millimetre`}
                   onPressIn={() => startHold(-1)}
                   onPressOut={stopHold}
                   style={styles.nudgeBtn}
@@ -189,7 +245,7 @@ export function MeasureScreen() {
                   <Text style={styles.nudgeText}>−</Text>
                 </Pressable>
                 <Pressable
-                  accessibilityLabel="Increase by 0.1 millimetre"
+                  accessibilityLabel={`Nudge ${activeBar} bar right by 0.1 millimetre`}
                   onPressIn={() => startHold(1)}
                   onPressOut={stopHold}
                   style={styles.nudgeBtn}
@@ -201,27 +257,59 @@ export function MeasureScreen() {
           </View>
         </View>
 
-        <View style={styles.spacer} />
-
-        <View
-          style={[styles.rulerEdge, { paddingBottom: bottomPad }]}
-          onLayout={onTrackLayout}
-        >
-          <RulerTrack
-            width={trackWidth}
-            mmPerDp={calibration.mmPerDp}
-            unit={unit}
-          />
-          <GestureDetector gesture={pan}>
+        <View style={styles.stage} onLayout={onStageLayout}>
+          <GestureDetector gesture={panLeft}>
             <Animated.View
-              style={[styles.handleHit, handleStyle]}
-              accessibilityLabel="Measure handle"
+              style={[styles.barHit, leftStyle]}
+              accessibilityLabel="Left measure bar"
               accessibilityRole="adjustable"
             >
-              <View style={styles.handleStem} />
-              <View style={styles.handleKnob} />
+              <View
+                style={[
+                  styles.barStem,
+                  activeBar === 'left' && styles.barStemActive,
+                ]}
+              />
+              <View
+                style={[
+                  styles.barKnob,
+                  activeBar === 'left' && styles.barKnobActive,
+                ]}
+              />
             </Animated.View>
           </GestureDetector>
+
+          <GestureDetector gesture={panRight}>
+            <Animated.View
+              style={[styles.barHit, rightStyle]}
+              accessibilityLabel="Right measure bar"
+              accessibilityRole="adjustable"
+            >
+              <View
+                style={[
+                  styles.barStem,
+                  activeBar === 'right' && styles.barStemActive,
+                ]}
+              />
+              <View
+                style={[
+                  styles.barKnob,
+                  activeBar === 'right' && styles.barKnobActive,
+                ]}
+              />
+            </Animated.View>
+          </GestureDetector>
+
+          <View
+            style={[styles.rulerEdge, { paddingBottom: bottomPad }]}
+            pointerEvents="none"
+          >
+            <RulerTrack
+              width={trackWidth}
+              mmPerDp={calibration.mmPerDp}
+              unit={unit}
+            />
+          </View>
         </View>
       </View>
     </View>
@@ -242,9 +330,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,
+    zIndex: 2,
   },
-  spacer: {
+  stage: {
     flex: 1,
+    position: 'relative',
+    marginTop: spacing.sm,
   },
   iconBtn: {
     width: 48,
@@ -281,41 +372,40 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '600',
   },
-  rulerEdge: {
-    width: '100%',
-    position: 'relative',
-  },
-  handleHit: {
+  barHit: {
     position: 'absolute',
-    bottom: 0,
-    width: HANDLE_HIT,
-    height: 96,
+    top: 0,
+    bottom: 72,
+    width: BAR_HIT,
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    zIndex: 3,
   },
-  handleStem: {
+  barStem: {
     width: 2,
     flex: 1,
     backgroundColor: colors.teal,
-    opacity: 0.9,
-    shadowColor: colors.teal,
-    shadowOpacity: 0.7,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 0 },
-    elevation: 4,
+    opacity: 0.75,
   },
-  handleKnob: {
+  barStemActive: {
+    opacity: 1,
+    width: 3,
+  },
+  barKnob: {
     width: 18,
     height: 18,
     borderRadius: 9,
-    marginBottom: 8,
-    backgroundColor: colors.teal,
+    marginBottom: 4,
+    backgroundColor: colors.tealDim,
     borderWidth: 2,
     borderColor: colors.white,
-    shadowColor: colors.teal,
-    shadowOpacity: 0.9,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 0 },
-    elevation: 6,
+  },
+  barKnobActive: {
+    backgroundColor: colors.teal,
+  },
+  rulerEdge: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
 });
