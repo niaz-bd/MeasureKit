@@ -4,6 +4,7 @@ import {
   CalibrationState,
   UnitSystem,
   defaultCalibration,
+  isUnitSystem,
 } from './units';
 
 const KEYS = {
@@ -36,7 +37,8 @@ export async function saveCalibration(state: CalibrationState): Promise<void> {
 export async function loadUnit(): Promise<UnitSystem> {
   try {
     const raw = await AsyncStorage.getItem(KEYS.unit);
-    return raw === 'inch' ? 'inch' : 'cm';
+    if (isUnitSystem(raw)) return raw;
+    return 'cm';
   } catch {
     return 'cm';
   }

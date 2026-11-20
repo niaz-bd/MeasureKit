@@ -9,7 +9,7 @@ import { BannerAdSlot } from '../components/BannerAdSlot';
 import type { RootStackParamList } from '../types';
 import { useSettings } from '../SettingsContext';
 import { colors, spacing } from '../theme';
-import { UnitSystem } from '../units';
+import { UNIT_OPTIONS, UnitSystem, unitDisplayName } from '../units';
 
 function Row({
   label,
@@ -58,14 +58,14 @@ export function SettingsScreen() {
 
       <Text style={styles.section}>Units</Text>
       <View style={styles.segment}>
-        {(['cm', 'inch'] as UnitSystem[]).map((u) => (
+        {UNIT_OPTIONS.map((u) => (
           <Pressable
             key={u}
             onPress={() => pickUnit(u)}
             style={[styles.segBtn, unit === u && styles.segBtnOn]}
           >
             <Text style={[styles.segText, unit === u && styles.segTextOn]}>
-              {u === 'cm' ? 'Centimetres' : 'Inches'}
+              {unitDisplayName(u)}
             </Text>
           </Pressable>
         ))}
@@ -131,13 +131,15 @@ const styles = StyleSheet.create({
   },
   segment: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     backgroundColor: colors.graphiteSoft,
     borderRadius: 12,
     padding: 4,
     gap: 4,
   },
   segBtn: {
-    flex: 1,
+    flexGrow: 1,
+    flexBasis: '47%',
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: 'center',

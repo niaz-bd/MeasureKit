@@ -26,10 +26,12 @@ import { useSettings } from '../SettingsContext';
 import { colors, spacing } from '../theme';
 import type { RootStackParamList } from '../types';
 import {
+  UNIT_OPTIONS,
   UnitSystem,
   dpToMm,
   formatMeasurement,
   mmToDp,
+  unitDisplayName,
   unitLabel,
 } from '../units';
 
@@ -230,16 +232,16 @@ export function MeasureScreen() {
         </Pressable>
       </View>
       <View style={styles.unitToggle}>
-        {(['cm', 'inch'] as UnitSystem[]).map((u) => (
+        {UNIT_OPTIONS.map((u) => (
           <Pressable
             key={u}
-            accessibilityLabel={`Use ${u === 'cm' ? 'centimetres' : 'inches'}`}
+            accessibilityLabel={`Use ${unitDisplayName(u)}`}
             accessibilityState={{ selected: unit === u }}
             style={[styles.unitBtn, unit === u && styles.unitBtnOn]}
             onPress={() => pickUnit(u)}
           >
             <Text style={[styles.unitText, unit === u && styles.unitTextOn]}>
-              {u === 'cm' ? 'cm' : 'in'}
+              {unitLabel(u)}
             </Text>
           </Pressable>
         ))}
@@ -456,8 +458,8 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   unitBtn: {
-    minWidth: 44,
-    paddingHorizontal: 14,
+    minWidth: 36,
+    paddingHorizontal: 10,
     paddingVertical: 8,
     borderRadius: 10,
     alignItems: 'center',
@@ -469,8 +471,8 @@ const styles = StyleSheet.create({
   unitText: {
     color: colors.textMuted,
     fontWeight: '700',
-    fontSize: 13,
-    letterSpacing: 0.5,
+    fontSize: 12,
+    letterSpacing: 0.3,
     textTransform: 'uppercase',
   },
   unitTextOn: {

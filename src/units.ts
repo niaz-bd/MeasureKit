@@ -4,7 +4,10 @@ export const CREDIT_CARD_LENGTH_MM = 85.6;
 /** React Native layout units are density-independent; 160 dp ≈ 1 inch. */
 export const DEFAULT_MM_PER_DP = 25.4 / 160;
 
-export type UnitSystem = 'cm' | 'inch';
+export type UnitSystem = 'inch' | 'm' | 'cm' | 'mm';
+
+/** Display order for unit selectors. */
+export const UNIT_OPTIONS: UnitSystem[] = ['inch', 'm', 'cm', 'mm'];
 
 export type CalibrationState = {
   /** Millimetres per density-independent pixel (layout unit). */
@@ -17,6 +20,10 @@ export const defaultCalibration = (): CalibrationState => ({
   calibratedAt: null,
 });
 
+export function isUnitSystem(value: string | null | undefined): value is UnitSystem {
+  return value === 'inch' || value === 'm' || value === 'cm' || value === 'mm';
+}
+
 export function dpToMm(dp: number, mmPerDp: number): number {
   return dp * mmPerDp;
 }
@@ -26,7 +33,29 @@ export function mmToDp(mm: number, mmPerDp: number): number {
 }
 
 export function mmToDisplay(mm: number, unit: UnitSystem): number {
-  return unit === 'cm' ? mm / 10 : mm / 25.4;
+  switch (unit) {
+    case 'mm':
+      return mm;
+    case 'cm':
+      return mm / 10;
+    case 'm':
+      return mm / 1000;
+    case 'inch':
+      return mm / 25.4;
+  }
+}
+
+export function formatDigits(unit: UnitSystem): number {
+  switch (unit) {
+    case 'mm':
+      return 1;
+    case 'cm':
+      return 2;
+    case 'm':
+      return 3;
+    case 'inch':
+      return 3;
+  }
 }
 
 export function formatMeasurement(
@@ -35,7 +64,7 @@ export function formatMeasurement(
   locale?: string,
 ): string {
   const value = mmToDisplay(mm, unit);
-  const digits = unit === 'cm' ? 2 : 3;
+  const digits = formatDigits(unit);
   try {
     return value.toLocaleString(locale, {
       minimumFractionDigits: digits,
@@ -47,14 +76,55 @@ export function formatMeasurement(
 }
 
 export function unitLabel(unit: UnitSystem): string {
-  return unit === 'cm' ? 'cm' : 'in';
+  switch (unit) {
+    case 'inch':
+      return 'in';
+    case 'm':
+      return 'm';
+    case 'cm':
+      return 'cm';
+    case 'mm':
+      return 'mm';
+  }
 }
 
-/** Tick step in mm for ruler drawing. */
+export function unitDisplayName(unit: UnitSystem): string {
+  switch (unit) {
+    case 'inch':
+      return 'Inches';
+    case 'm':
+      return 'Metres';
+    case 'cm':
+      return 'Centimetres';
+    case 'mm':
+      return 'Millimetres';
+  }
+}
+
+/** Major tick spacing in millimetres for ruler drawing. */
 export function majorTickMm(unit: UnitSystem): number {
-  return unit === 'cm' ? 10 : 25.4;
+  switch (unit) {
+    case 'mm':
+      return 10; // label every 10 mm
+    case 'cm':
+      return 10; // 1 cm
+    case 'm':
+      return 100; // 0.1 m
+    case 'inch':
+      return 25.4;
+  }
 }
 
+/** Finest tick spacing in millimetres. */
 export function minorTickMm(unit: UnitSystem): number {
-  return unit === 'cm' ? 1 : 25.4 / 16;
+  switch (unit) {
+    case 'mm':
+      return 1;
+    case 'cm':
+      return 1;
+    case 'm':
+      return 10; // 1 cm steps on a metre scale
+    case 'inch':
+      return 25.4 / 16;
+  }
 }

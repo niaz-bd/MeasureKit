@@ -38,24 +38,38 @@ function near(mm: number, step: number): boolean {
 
 function formatTickLabel(mm: number, unit: UnitSystem, kind: TickKind): string {
   const value = mmToDisplay(mm, unit);
-  if (unit === 'cm') {
-    const rounded = Math.round(value * 10) / 10;
-    if (kind === 'major') return String(Math.round(rounded));
-    // Half-cm: one decimal if needed
-    return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+  switch (unit) {
+    case 'mm': {
+      const n = Math.round(value);
+      return String(n);
+    }
+    case 'cm': {
+      const rounded = Math.round(value * 10) / 10;
+      if (kind === 'major') return String(Math.round(rounded));
+      return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+    }
+    case 'm': {
+      const rounded = Math.round(value * 1000) / 1000;
+      if (kind === 'major') {
+        if (Math.abs(rounded - Math.round(rounded)) < 0.001) {
+          return String(Math.round(rounded));
+        }
+        return rounded.toFixed(1);
+      }
+      return rounded.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+    }
+    case 'inch': {
+      if (kind === 'major') return String(Math.round(value));
+      const sixteenths = Math.round(value * 16) / 16;
+      if (Math.abs(sixteenths - Math.round(sixteenths)) < 0.001) {
+        return String(Math.round(sixteenths));
+      }
+      if (Math.abs(sixteenths * 2 - Math.round(sixteenths * 2)) < 0.001) {
+        return sixteenths.toFixed(1).replace(/\.0$/, '');
+      }
+      return sixteenths.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+    }
   }
-  // Inches — prefer fraction-ish decimals at sub-inch marks
-  if (kind === 'major') {
-    return String(Math.round(value));
-  }
-  const sixteenths = Math.round(value * 16) / 16;
-  if (Math.abs(sixteenths - Math.round(sixteenths)) < 0.001) {
-    return String(Math.round(sixteenths));
-  }
-  if (Math.abs(sixteenths * 2 - Math.round(sixteenths * 2)) < 0.001) {
-    return sixteenths.toFixed(1).replace(/\.0$/, '');
-  }
-  return sixteenths.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
 }
 
 function tickHeight(kind: TickKind, height: number): number {
@@ -95,14 +109,14 @@ function classifyTick(mm: number, unit: UnitSystem): TickKind {
   if (unit === 'inch') {
     if (near(mm, major / 4)) return 'quarter';
     if (near(mm, major / 8)) return 'eighth';
-  } else {
-    // cm mode: 5 mm is half; no quarter/eighth beyond mm minors
+  } else if (unit === 'cm' || unit === 'mm') {
     if (near(mm, 5)) return 'half';
+  } else if (unit === 'm') {
+    if (near(mm, 50)) return 'half'; // 0.05 m
   }
   return 'minor';
 }
 
-/** Prefer denser labels when major ticks are spaced enough on screen. */
 function shouldLabel(
   kind: TickKind,
   unit: UnitSystem,
@@ -113,7 +127,9 @@ function shouldLabel(
   if (unit === 'inch' && kind === 'quarter' && majorDp >= 56) {
     return { label: true, size: 'sm' };
   }
-  // Very wide cm scale: also label every 5 mm already covered by half
+  if (unit === 'mm' && kind === 'half' && majorDp >= 20) {
+    return { label: true, size: 'sm' };
+  }
   return { label: false, size: 'sm' };
 }
 
@@ -136,7 +152,6 @@ export function RulerTrack({ width, mmPerDp, unit, height = 88 }: Props) {
 
       const kind = classifyTick(mm, unit);
       const { label: wantLabel, size } = shouldLabel(kind, unit, majorDp);
-      // Keep labels readable: min ~16 dp gap (smaller for sm)
       const minGap = size === 'lg' ? 16 : 14;
       let label: string | undefined;
       if (wantLabel && (x - lastLabelX >= minGap || x < 2)) {
