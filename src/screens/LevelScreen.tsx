@@ -53,7 +53,7 @@ export function LevelScreen() {
   const magnitude = Math.hypot(rollDeg, pitchDeg);
   const isLevel = magnitude <= LEVEL_TOLERANCE_DEG;
 
-  useLogMeasurementOnLeave('level', 'Spirit level', () => ({
+  useLogMeasurementOnLeave('level', 'Bubble level', () => ({
     summary: `Tilt ${magnitude.toFixed(1)}°`,
     values: {
       rollDeg: Number(rollDeg.toFixed(2)),
@@ -99,7 +99,7 @@ export function LevelScreen() {
   if (available === false) {
     return (
       <View style={[styles.root, styles.centered]}>
-        <Text style={styles.title}>Spirit level</Text>
+        <Text style={styles.title}>Bubble level</Text>
         <Text style={styles.body}>
           Accelerometer is not available on this device.
         </Text>
@@ -120,7 +120,7 @@ export function LevelScreen() {
         >
           <MaterialCommunityIcons name="arrow-left" size={24} color={colors.text} />
         </Pressable>
-        <Text style={styles.title}>Spirit level</Text>
+        <Text style={styles.title}>Bubble level</Text>
         <View style={styles.iconBtnPlaceholder} />
       </View>
 
@@ -178,7 +178,7 @@ export function LevelScreen() {
             setZeroFromLatest();
             logMeasurement({
               toolId: 'level',
-              toolName: 'Spirit level',
+              toolName: 'Bubble level',
               summary: 'Zero calibrated',
               values: {
                 rollDeg: Number(rollDeg.toFixed(2)),

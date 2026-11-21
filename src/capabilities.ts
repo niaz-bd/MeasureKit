@@ -69,15 +69,8 @@ type Probe = Omit<FeatureCapability, 'available' | 'reason'> & {
   check: () => Promise<{ available: boolean; reason?: string }>;
 };
 
+/** Home menu order is intentional — keep this list order stable. */
 const FEATURE_PROBES: Probe[] = [
-  {
-    id: 'ruler',
-    route: 'Measure',
-    title: 'Ruler',
-    subtitle: 'On-screen measure',
-    icon: 'ruler',
-    check: async () => ({ available: true }),
-  },
   {
     id: 'calculator',
     route: 'Calculator',
@@ -95,39 +88,32 @@ const FEATURE_PROBES: Probe[] = [
     check: async () => ({ available: true }),
   },
   {
-    id: 'measureHistory',
-    route: 'MeasureHistory',
-    title: 'History',
-    subtitle: 'Past measurements',
-    icon: 'history',
+    id: 'ruler',
+    route: 'Measure',
+    title: 'Ruler',
+    subtitle: 'On-screen measure',
+    icon: 'ruler',
     check: async () => ({ available: true }),
-  },
-  {
-    id: 'ar',
-    route: 'ArMeasure',
-    title: 'AR measure',
-    subtitle: 'Real-world tap measure',
-    icon: 'cube-scan',
-    check: async () => {
-      if (canUseArMeasure()) return { available: true };
-      if (isExpoGo()) {
-        return {
-          available: false,
-          reason: 'Needs native build (expo run:android), not Expo Go',
-        };
-      }
-      return {
-        available: false,
-        reason: 'ARCore / Viro not available on this device',
-      };
-    },
   },
   {
     id: 'level',
     route: 'Level',
-    title: 'Spirit level',
-    subtitle: 'Bubble level',
+    title: 'Bubble level',
+    subtitle: 'Spirit / bubble level',
     icon: 'spirit-level',
+    check: async () => {
+      const ok = await Accelerometer.isAvailableAsync();
+      return ok
+        ? { available: true }
+        : { available: false, reason: 'Accelerometer not available' };
+    },
+  },
+  {
+    id: 'angleMeter',
+    route: 'AngleMeter',
+    title: 'Angle meter',
+    subtitle: 'Two-edge capture',
+    icon: 'angle-right',
     check: async () => {
       const ok = await Accelerometer.isAvailableAsync();
       return ok
@@ -141,32 +127,6 @@ const FEATURE_PROBES: Probe[] = [
     title: 'Inclinometer',
     subtitle: 'Surface angle gauge',
     icon: 'angle-acute',
-    check: async () => {
-      const ok = await Accelerometer.isAvailableAsync();
-      return ok
-        ? { available: true }
-        : { available: false, reason: 'Accelerometer not available' };
-    },
-  },
-  {
-    id: 'compass',
-    route: 'Compass',
-    title: 'Compass',
-    subtitle: 'Magnetic heading',
-    icon: 'compass-outline',
-    check: async () => {
-      const ok = await Magnetometer.isAvailableAsync();
-      return ok
-        ? { available: true }
-        : { available: false, reason: 'Magnetometer not available' };
-    },
-  },
-  {
-    id: 'angleMeter',
-    route: 'AngleMeter',
-    title: 'Angle meter',
-    subtitle: 'Two-edge capture',
-    icon: 'angle-right',
     check: async () => {
       const ok = await Accelerometer.isAvailableAsync();
       return ok
@@ -238,6 +198,47 @@ const FEATURE_PROBES: Probe[] = [
       }
       return { available: true };
     },
+  },
+  {
+    id: 'compass',
+    route: 'Compass',
+    title: 'Compass',
+    subtitle: 'Magnetic heading',
+    icon: 'compass-outline',
+    check: async () => {
+      const ok = await Magnetometer.isAvailableAsync();
+      return ok
+        ? { available: true }
+        : { available: false, reason: 'Magnetometer not available' };
+    },
+  },
+  {
+    id: 'ar',
+    route: 'ArMeasure',
+    title: 'AR measure',
+    subtitle: 'Real-world tap measure',
+    icon: 'cube-scan',
+    check: async () => {
+      if (canUseArMeasure()) return { available: true };
+      if (isExpoGo()) {
+        return {
+          available: false,
+          reason: 'Needs native build (expo run:android), not Expo Go',
+        };
+      }
+      return {
+        available: false,
+        reason: 'ARCore / Viro not available on this device',
+      };
+    },
+  },
+  {
+    id: 'measureHistory',
+    route: 'MeasureHistory',
+    title: 'History',
+    subtitle: 'Past measurements',
+    icon: 'history',
+    check: async () => ({ available: true }),
   },
   {
     id: 'settings',

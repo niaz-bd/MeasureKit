@@ -18,7 +18,6 @@ import {
   type FeatureCapability,
 } from '../capabilities';
 import { BannerAdSlot } from '../components/BannerAdSlot';
-import { RemoveAdsButton } from '../components/RemoveAdsButton';
 import { colors, spacing } from '../theme';
 import type { RootStackParamList } from '../types';
 
@@ -54,9 +53,6 @@ export function HomeScreen() {
       <View style={styles.top}>
         <Text style={styles.brand}>MeasureKit</Text>
         <Text style={styles.tagline}>Choose a tool</Text>
-        <View style={styles.removeAds}>
-          <RemoveAdsButton />
-        </View>
       </View>
 
       {features == null ? (
@@ -139,11 +135,7 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: 15,
     marginTop: 4,
-    marginBottom: spacing.sm,
-  },
-  removeAds: {
-    alignSelf: 'flex-start',
-    marginBottom: spacing.sm,
+    marginBottom: spacing.lg,
   },
   loading: {
     flex: 1,
