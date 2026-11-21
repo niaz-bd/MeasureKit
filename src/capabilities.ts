@@ -243,7 +243,7 @@ const FEATURE_PROBES: Probe[] = [
     id: 'settings',
     route: 'Settings',
     title: 'Settings',
-    subtitle: 'Units & calibration',
+    subtitle: 'Ads & about',
     icon: 'cog-outline',
     check: async () => ({ available: true }),
   },

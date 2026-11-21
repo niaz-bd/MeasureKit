@@ -20,17 +20,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GlowReadout } from '../components/GlowReadout';
 import { RulerTrack } from '../components/RulerTrack';
+import { SegmentControl } from '../components/SegmentControl';
 import { useLogMeasurementOnLeave } from '../history/useLogMeasurementOnLeave';
-import { useSettings } from '../SettingsContext';
+import { useToolPrefs } from '../hooks/useToolPrefs';
 import { colors, spacing } from '../theme';
 import type { RootStackParamList } from '../types';
 import {
   UNIT_OPTIONS,
   UnitSystem,
+  defaultCalibration,
   dpToMm,
   formatMeasurement,
   mmToDp,
-  unitDisplayName,
   unitLabel,
 } from '../units';
 
@@ -46,8 +47,11 @@ export function MeasureScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const insets = useSafeAreaInsets();
-  const { unit, setUnit, calibration } = useSettings();
+  const { prefs, updatePrefs, refresh } = useToolPrefs('ruler');
+  const unit = prefs.unit;
+  const calibration = prefs.calibration ?? defaultCalibration();
   const [trackWidth, setTrackWidth] = useState(0);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [fineMode, setFineMode] = useState(false);
   const [displayMm, setDisplayMm] = useState(0);
   const [activeBar, setActiveBar] = useState<ActiveBar>('right');
@@ -66,10 +70,11 @@ export function MeasureScreen() {
       ScreenOrientation.lockAsync(
         ScreenOrientation.OrientationLock.LANDSCAPE,
       ).catch(() => undefined);
+      refresh().catch(() => undefined);
       return () => {
         ScreenOrientation.unlockAsync().catch(() => undefined);
       };
-    }, []),
+    }, [refresh]),
   );
 
   useLogMeasurementOnLeave('ruler', 'Ruler', () => {
@@ -213,26 +218,21 @@ export function MeasureScreen() {
   const bottomPad = Math.max(insets.bottom > 24 ? 0 : insets.bottom, 0);
 
   const pickUnit = (next: UnitSystem) => {
-    setUnit(next).catch(() => undefined);
+    updatePrefs({ unit: next }).catch(() => undefined);
   };
 
   const unitToggle = (
-    <View style={styles.unitToggle}>
-      {UNIT_OPTIONS.map((u) => (
-        <Pressable
-          key={u}
-          accessibilityLabel={`Use ${unitDisplayName(u)}`}
-          accessibilityState={{ selected: unit === u }}
-          style={[styles.unitBtn, unit === u && styles.unitBtnOn]}
-          onPress={() => pickUnit(u)}
-        >
-          <Text style={[styles.unitText, unit === u && styles.unitTextOn]}>
-            {unitLabel(u)}
-          </Text>
-        </Pressable>
-      ))}
-    </View>
+    <SegmentControl
+      accessibilityLabel="Ruler units"
+      value={unit}
+      onChange={pickUnit}
+      options={UNIT_OPTIONS.map((u) => ({ value: u, label: unitLabel(u) }))}
+    />
   );
+
+  const calibratedLabel = calibration.calibratedAt
+    ? `Calibrated ${new Date(calibration.calibratedAt).toLocaleString()}`
+    : 'Using screen density (not calibrated)';
 
   return (
     <View style={styles.root}>
@@ -296,14 +296,14 @@ export function MeasureScreen() {
               />
             </Pressable>
             <Pressable
-              accessibilityLabel="Open settings"
-              onPress={() => navigation.navigate('Settings')}
-              style={styles.iconBtn}
+              accessibilityLabel="Ruler settings"
+              onPress={() => setSettingsOpen((v) => !v)}
+              style={[styles.iconBtn, settingsOpen && styles.iconBtnActive]}
             >
               <MaterialCommunityIcons
                 name="cog-outline"
                 size={26}
-                color={colors.text}
+                color={settingsOpen ? colors.teal : colors.text}
               />
             </Pressable>
           </View>
@@ -360,6 +360,39 @@ export function MeasureScreen() {
             unit={unit}
           />
         </View>
+
+        {settingsOpen ? (
+          <View style={styles.settingsPanel} pointerEvents="box-none">
+            <Text style={styles.settingsTitle}>Ruler settings</Text>
+            <Text style={styles.settingsDetail}>{calibratedLabel}</Text>
+            <View style={styles.settingsActions}>
+              <Pressable
+                style={styles.settingsBtn}
+                onPress={() => {
+                  setSettingsOpen(false);
+                  navigation.navigate('Calibration');
+                }}
+              >
+                <Text style={styles.settingsBtnText}>Calibrate card</Text>
+              </Pressable>
+              <Pressable
+                style={styles.settingsBtnSecondary}
+                onPress={() => {
+                  updatePrefs({
+                    calibration: defaultCalibration(),
+                  }).catch(() => undefined);
+                }}
+              >
+                <Text style={styles.settingsBtnSecondaryText}>
+                  Reset density
+                </Text>
+              </Pressable>
+            </View>
+            <Text style={styles.settingsHint}>
+              Units above apply to this ruler only (not AR or other tools).
+            </Text>
+          </View>
+        ) : null}
       </View>
     </View>
   );
@@ -393,34 +426,58 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
   },
-  unitToggle: {
-    flexDirection: 'row',
-    flexShrink: 0,
-    backgroundColor: 'rgba(42, 48, 56, 0.82)',
-    borderRadius: 12,
-    padding: 3,
-    gap: 2,
+  settingsPanel: {
+    position: 'absolute',
+    left: spacing.md,
+    right: spacing.md,
+    top: 72,
+    zIndex: 6,
+    backgroundColor: colors.graphiteSoft,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.graphiteEdge,
+    padding: spacing.md,
+    gap: spacing.sm,
   },
-  unitBtn: {
-    minWidth: 36,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  unitBtnOn: {
-    backgroundColor: colors.teal,
-  },
-  unitText: {
-    color: colors.textMuted,
+  settingsTitle: {
+    color: colors.text,
     fontWeight: '700',
-    fontSize: 12,
-    letterSpacing: 0.3,
-    textTransform: 'uppercase',
+    fontSize: 16,
   },
-  unitTextOn: {
+  settingsDetail: {
+    color: colors.textMuted,
+    fontSize: 13,
+  },
+  settingsActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  settingsBtn: {
+    backgroundColor: colors.teal,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  settingsBtnText: {
     color: colors.graphite,
+    fontWeight: '700',
+  },
+  settingsBtnSecondary: {
+    borderWidth: 1,
+    borderColor: colors.graphiteEdge,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  settingsBtnSecondaryText: {
+    color: colors.text,
+    fontWeight: '600',
+  },
+  settingsHint: {
+    color: colors.textMuted,
+    fontSize: 12,
+    lineHeight: 16,
   },
   iconBtn: {
     width: 48,

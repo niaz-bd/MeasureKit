@@ -7,9 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdSlot } from '../components/BannerAdSlot';
 import { RemoveAdsButton } from '../components/RemoveAdsButton';
 import type { RootStackParamList } from '../types';
-import { useSettings } from '../SettingsContext';
 import { colors, spacing } from '../theme';
-import { UNIT_OPTIONS, UnitSystem, unitDisplayName } from '../units';
 
 function Row({
   label,
@@ -28,68 +26,40 @@ function Row({
   );
 }
 
+/**
+ * App-level settings only (ads / about).
+ * Units and calibration live on each tool screen.
+ */
 export function SettingsScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const insets = useSafeAreaInsets();
-  const { unit, setUnit, calibration, resetCalibration } = useSettings();
-
-  const pickUnit = async (next: UnitSystem) => {
-    await setUnit(next);
-  };
-
-  const leave = () => {
-    navigation.navigate('Home');
-  };
-
-  const calibratedLabel = calibration.calibratedAt
-    ? new Date(calibration.calibratedAt).toLocaleString()
-    : 'Using screen density (not calibrated)';
 
   return (
     <View style={[styles.root, { paddingTop: insets.top + spacing.md }]}>
       <View style={styles.header}>
         <Text style={styles.title}>Settings</Text>
-        <Pressable onPress={leave} style={styles.done}>
+        <Pressable
+          onPress={() => navigation.navigate('Home')}
+          style={styles.done}
+        >
           <Text style={styles.doneText}>Done</Text>
         </Pressable>
       </View>
-
-      <Text style={styles.section}>Units</Text>
-      <View style={styles.segment}>
-        {UNIT_OPTIONS.map((u) => (
-          <Pressable
-            key={u}
-            onPress={() => pickUnit(u)}
-            style={[styles.segBtn, unit === u && styles.segBtnOn]}
-          >
-            <Text style={[styles.segText, unit === u && styles.segTextOn]}>
-              {unitDisplayName(u)}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
-
-      <Text style={styles.section}>Scale</Text>
-      <Row
-        label="Calibrate with credit card"
-        detail={calibratedLabel}
-        onPress={() => navigation.navigate('Calibration')}
-      />
-      <Row
-        label="Reset to density default"
-        onPress={() => {
-          resetCalibration().catch(() => undefined);
-        }}
-      />
 
       <Text style={styles.section}>Ads</Text>
       <View style={styles.removeAds}>
         <RemoveAdsButton />
       </View>
+      <Text style={styles.hint}>
+        Length, area, and speed units are set inside each tool — not here.
+      </Text>
 
       <Text style={styles.section}>About</Text>
-      <Row label="About MeasureKit" onPress={() => navigation.navigate('About')} />
+      <Row
+        label="About MeasureKit"
+        onPress={() => navigation.navigate('About')}
+      />
 
       <View style={[styles.ad, { paddingBottom: Math.max(insets.bottom, 0) }]}>
         <BannerAdSlot />
@@ -133,30 +103,11 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
-  segment: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    backgroundColor: colors.graphiteSoft,
-    borderRadius: 12,
-    padding: 4,
-    gap: 4,
-  },
-  segBtn: {
-    flexGrow: 1,
-    flexBasis: '47%',
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  segBtnOn: {
-    backgroundColor: colors.teal,
-  },
-  segText: {
+  hint: {
+    marginTop: spacing.sm,
     color: colors.textMuted,
-    fontWeight: '600',
-  },
-  segTextOn: {
-    color: colors.graphite,
+    fontSize: 13,
+    lineHeight: 18,
   },
   row: {
     paddingVertical: 16,

@@ -2,7 +2,6 @@
  * Native-only AR measure UI (Viro + ARCore).
  * Load only after hasViroNative() is true.
  */
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   LayoutChangeEvent,
@@ -24,9 +23,15 @@ import {
 } from '@reactvision/react-viro';
 
 import { GlowReadout } from '../components/GlowReadout';
+import { SegmentControl } from '../components/SegmentControl';
 import { logMeasurement } from '../history/measureHistory';
 import { colors, spacing } from '../theme';
-import { formatMeasurement, unitLabel, type UnitSystem } from '../units';
+import {
+  UNIT_OPTIONS,
+  formatMeasurement,
+  unitLabel,
+  type UnitSystem,
+} from '../units';
 
 type Vec3 = [number, number, number];
 type HitResult = {
@@ -36,7 +41,7 @@ type HitResult = {
 
 export type ArMeasureNativeProps = {
   unit: UnitSystem;
-  onOpenSettings: () => void;
+  onChangeUnit: (unit: UnitSystem) => void;
 };
 
 type TapRequest = { x: number; y: number; id: number };
@@ -191,7 +196,7 @@ function ArMeasureScene(props: {
   );
 }
 
-export function ArMeasureNative({ unit, onOpenSettings }: ArMeasureNativeProps) {
+export function ArMeasureNative({ unit, onChangeUnit }: ArMeasureNativeProps) {
   const [distanceMm, setDistanceMm] = useState<number | null>(null);
   const [hint, setHint] = useState('Initializing AR…');
   const [trackingOk, setTrackingOk] = useState(false);
@@ -265,17 +270,18 @@ export function ArMeasureNative({ unit, onOpenSettings }: ArMeasureNativeProps) 
       </View>
 
       <View style={styles.chrome} pointerEvents="box-none">
-        <Pressable
-          style={styles.iconBtn}
-          onPress={onOpenSettings}
-          accessibilityLabel="Open settings"
-        >
-          <MaterialCommunityIcons
-            name="cog-outline"
-            size={26}
-            color={colors.text}
+        <View style={styles.unitCluster}>
+          <SegmentControl
+            accessibilityLabel="AR units"
+            value={unit}
+            onChange={onChangeUnit}
+            options={UNIT_OPTIONS.map((u) => ({
+              value: u,
+              label: unitLabel(u),
+            }))}
           />
-        </Pressable>
+          <Text style={styles.unitHint}>AR units (this tool only)</Text>
+        </View>
         <GlowReadout value={readout} unit={unitLabel(unit)} />
         <View style={styles.actions}>
           <Pressable
@@ -361,13 +367,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     zIndex: 4,
   },
-  iconBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(42, 48, 56, 0.72)',
+  unitCluster: {
+    maxWidth: 160,
+    gap: 4,
+  },
+  unitHint: {
+    color: colors.textMuted,
+    fontSize: 10,
   },
   actions: { gap: spacing.sm, alignItems: 'flex-end' },
   actionBtn: {

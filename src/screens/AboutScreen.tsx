@@ -19,11 +19,9 @@ export function AboutScreen() {
         an optional credit-card calibration (ISO ID-1 long edge, 85.6 mm).
       </Text>
       <Text style={styles.body}>
-        Ads use Google AdMob{' '}
-        {USE_ADMOB_TEST_IDS ? 'test' : 'production'} unit IDs. Banners appear on
-        hub screens only; interstitials fire when leaving a measure tool (with a
-        cooldown); never during ruler drag or AR place. See README for test vs
-        production IDs.
+        Each tool keeps its own units (and ruler calibration). Global Settings
+        is only for ads and about. Ads use Google AdMob{' '}
+        {USE_ADMOB_TEST_IDS ? 'test' : 'production'} unit IDs — see README.
       </Text>
       <Text style={styles.meta}>Version 1.0.0 · Android focus</Text>
 

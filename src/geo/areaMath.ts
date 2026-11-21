@@ -50,8 +50,31 @@ export function polygonAreaM2(points: LatLng[]): number {
   return Math.abs((total * EARTH_RADIUS_M * EARTH_RADIUS_M) / 2);
 }
 
-export function formatArea(m2: number): { value: string; unit: string } {
-  if (!Number.isFinite(m2) || m2 <= 0) return { value: '0', unit: 'm²' };
+export type AreaUnitSystem = 'metric' | 'imperial';
+
+const SQ_M_PER_SQ_FT = 0.09290304;
+const SQ_M_PER_ACRE = 4046.8564224;
+const M_PER_FT = 0.3048;
+const M_PER_MI = 1609.344;
+
+export function formatArea(
+  m2: number,
+  system: AreaUnitSystem = 'metric',
+): { value: string; unit: string } {
+  if (!Number.isFinite(m2) || m2 <= 0) {
+    return { value: '0', unit: system === 'imperial' ? 'ft²' : 'm²' };
+  }
+  if (system === 'imperial') {
+    const acres = m2 / SQ_M_PER_ACRE;
+    if (acres >= 0.25) {
+      return { value: acres.toFixed(3), unit: 'ac' };
+    }
+    const ft2 = m2 / SQ_M_PER_SQ_FT;
+    if (ft2 >= 100) {
+      return { value: ft2.toFixed(0), unit: 'ft²' };
+    }
+    return { value: ft2.toFixed(1), unit: 'ft²' };
+  }
   if (m2 >= 1_000_000) {
     return { value: (m2 / 1_000_000).toFixed(3), unit: 'km²' };
   }
@@ -64,8 +87,23 @@ export function formatArea(m2: number): { value: string; unit: string } {
   return { value: m2.toFixed(2), unit: 'm²' };
 }
 
-export function formatLength(m: number): { value: string; unit: string } {
-  if (!Number.isFinite(m) || m <= 0) return { value: '0', unit: 'm' };
+export function formatLength(
+  m: number,
+  system: AreaUnitSystem = 'metric',
+): { value: string; unit: string } {
+  if (!Number.isFinite(m) || m <= 0) {
+    return { value: '0', unit: system === 'imperial' ? 'ft' : 'm' };
+  }
+  if (system === 'imperial') {
+    if (m >= M_PER_MI) {
+      return { value: (m / M_PER_MI).toFixed(3), unit: 'mi' };
+    }
+    const ft = m / M_PER_FT;
+    return {
+      value: ft >= 100 ? ft.toFixed(0) : ft.toFixed(1),
+      unit: 'ft',
+    };
+  }
   if (m >= 1000) {
     return { value: (m / 1000).toFixed(3), unit: 'km' };
   }

@@ -19,6 +19,7 @@ import MapView, {
 } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { SegmentControl } from '../components/SegmentControl';
 import {
   GPS_MIN_STEP_M,
   formatArea,
@@ -29,7 +30,9 @@ import {
   type LatLng,
 } from '../geo/areaMath';
 import { useLogMeasurementOnLeave } from '../history/useLogMeasurementOnLeave';
+import { useToolPrefs } from '../hooks/useToolPrefs';
 import { colors, spacing } from '../theme';
+import type { AreaUnitSystem } from '../toolPrefs';
 
 type Mode = 'manual' | 'gps';
 type MapKind = 'hybrid' | 'standard' | 'satellite';
@@ -45,6 +48,8 @@ export function LandAreaScreen() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const mapRef = useRef<MapView>(null);
+  const { prefs, updatePrefs } = useToolPrefs('landArea');
+  const unitSystem = prefs.unitSystem;
 
   const [mode, setMode] = useState<Mode>('manual');
   const [mapKind, setMapKind] = useState<MapKind>('hybrid');
@@ -150,8 +155,8 @@ export function LandAreaScreen() {
 
   const areaM2 = useMemo(() => polygonAreaM2(points), [points]);
   const periM = useMemo(() => perimeterM(points), [points]);
-  const areaFmt = formatArea(areaM2);
-  const periFmt = formatLength(periM);
+  const areaFmt = formatArea(areaM2, unitSystem);
+  const periFmt = formatLength(periM, unitSystem);
 
   useLogMeasurementOnLeave('landArea', 'Land area', () => {
     if (points.length < 3 || !(areaM2 > 0)) return null;
@@ -162,6 +167,7 @@ export function LandAreaScreen() {
         perimeterM: Number(periM.toFixed(2)),
         points: points.length,
         mode,
+        unitSystem,
       },
     };
   });
@@ -245,6 +251,20 @@ export function LandAreaScreen() {
         >
           <MaterialCommunityIcons name="layers-outline" size={22} color={colors.text} />
         </Pressable>
+      </View>
+
+      <View style={styles.unitRow}>
+        <SegmentControl<AreaUnitSystem>
+          accessibilityLabel="Land area units"
+          value={unitSystem}
+          onChange={(next) => {
+            updatePrefs({ unitSystem: next }).catch(() => undefined);
+          }}
+          options={[
+            { value: 'metric', label: 'Metric' },
+            { value: 'imperial', label: 'Imperial' },
+          ]}
+        />
       </View>
 
       <View style={styles.modeRow}>
@@ -337,12 +357,14 @@ export function LandAreaScreen() {
             {areaFmt.value}{' '}
             <Text style={styles.statUnit}>{areaFmt.unit}</Text>
           </Text>
-          {areaM2 >= 10_000 ? (
+          {unitSystem === 'metric' && areaM2 >= 10_000 ? (
             <Text style={styles.statSub}>{areaM2.toFixed(0)} m²</Text>
-          ) : areaM2 >= 100 ? (
+          ) : unitSystem === 'metric' && areaM2 >= 100 ? (
             <Text style={styles.statSub}>
               {(areaM2 / 10_000).toFixed(4)} ha
             </Text>
+          ) : unitSystem === 'imperial' && areaM2 > 0 ? (
+            <Text style={styles.statSub}>{areaM2.toFixed(0)} m²</Text>
           ) : null}
         </View>
         <View style={styles.statDivider} />
@@ -455,6 +477,10 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 20,
     fontWeight: '600',
+  },
+  unitRow: {
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.sm,
   },
   modeRow: {
     flexDirection: 'row',

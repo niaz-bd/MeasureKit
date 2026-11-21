@@ -16,8 +16,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { loadToolPrefs, saveToolPrefs } from '../toolPrefs';
 import type { RootStackParamList } from '../types';
-import { useSettings } from '../SettingsContext';
 import { colors, spacing } from '../theme';
 import { CREDIT_CARD_LENGTH_MM, DEFAULT_MM_PER_DP } from '../units';
 
@@ -27,7 +27,6 @@ export function CalibrationScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const insets = useSafeAreaInsets();
-  const { applyCalibration } = useSettings();
   const [width, setWidth] = useState(0);
   const [cardDp, setCardDp] = useState(0);
   const x = useSharedValue(0);
@@ -70,7 +69,14 @@ export function CalibrationScreen() {
   const onSave = async () => {
     if (cardDp <= 0) return;
     const mmPerDp = CREDIT_CARD_LENGTH_MM / cardDp;
-    await applyCalibration(mmPerDp);
+    const prefs = await loadToolPrefs('ruler');
+    await saveToolPrefs('ruler', {
+      ...prefs,
+      calibration: {
+        mmPerDp,
+        calibratedAt: new Date().toISOString(),
+      },
+    });
     navigation.navigate('Measure');
   };
 

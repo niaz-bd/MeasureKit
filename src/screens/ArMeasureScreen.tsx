@@ -5,14 +5,15 @@ import React, { useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { ArMeasurePanel } from '../ar/ArMeasurePanel';
-import { useSettings } from '../SettingsContext';
+import { useToolPrefs } from '../hooks/useToolPrefs';
 import { colors } from '../theme';
 import type { RootStackParamList } from '../types';
+import type { UnitSystem } from '../units';
 
 export function ArMeasureScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { unit } = useSettings();
+  const { prefs, updatePrefs } = useToolPrefs('ar');
 
   useFocusEffect(
     useCallback(() => {
@@ -25,11 +26,15 @@ export function ArMeasureScreen() {
     }, []),
   );
 
+  const onChangeUnit = (unit: UnitSystem) => {
+    updatePrefs({ unit }).catch(() => undefined);
+  };
+
   return (
     <View style={styles.root}>
       <ArMeasurePanel
-        unit={unit}
-        onOpenSettings={() => navigation.navigate('Settings')}
+        unit={prefs.unit}
+        onChangeUnit={onChangeUnit}
         onBackToContact={() => navigation.navigate('Home')}
       />
     </View>

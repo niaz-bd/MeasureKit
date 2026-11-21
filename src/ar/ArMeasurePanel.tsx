@@ -8,7 +8,7 @@ import type { UnitSystem } from '../units';
 
 type Props = {
   unit: UnitSystem;
-  onOpenSettings: () => void;
+  onChangeUnit: (unit: UnitSystem) => void;
   onBackToContact: () => void;
 };
 
@@ -17,7 +17,7 @@ type NativeComp = React.ComponentType<ArMeasureNativeProps>;
 /**
  * Gates AR behind a native Viro/ARCore build. Expo Go never loads the Viro package.
  */
-export function ArMeasurePanel({ unit, onOpenSettings, onBackToContact }: Props) {
+export function ArMeasurePanel({ unit, onChangeUnit, onBackToContact }: Props) {
   const [Native, setNative] = useState<NativeComp | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const available = canUseArMeasure();
@@ -96,7 +96,7 @@ export function ArMeasurePanel({ unit, onOpenSettings, onBackToContact }: Props)
     );
   }
 
-  return <Native unit={unit} onOpenSettings={onOpenSettings} />;
+  return <Native unit={unit} onChangeUnit={onChangeUnit} />;
 }
 
 const styles = StyleSheet.create({

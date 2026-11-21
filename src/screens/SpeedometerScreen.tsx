@@ -5,14 +5,19 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import React, { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { SegmentControl } from '../components/SegmentControl';
 import { useLogMeasurementOnLeave } from '../history/useLogMeasurementOnLeave';
+import { useToolPrefs } from '../hooks/useToolPrefs';
 import { formatSpeed } from '../sensors/speed';
 import { useSmoothedSpeed } from '../sensors/useSmoothedSpeed';
 import { colors, spacing } from '../theme';
+import type { SpeedUnit } from '../toolPrefs';
 
 export function SpeedometerScreen() {
   const navigation = useNavigation();
   const [active, setActive] = useState(true);
+  const { prefs, updatePrefs } = useToolPrefs('speedometer');
+  const unit = prefs.unit;
   const {
     ready,
     permissionDenied,
@@ -33,11 +38,14 @@ export function SpeedometerScreen() {
 
   useLogMeasurementOnLeave('speedometer', 'Speedometer', () => {
     if (!(kmh > 0.5)) return null;
+    const primary = unit === 'mph' ? mph : kmh;
+    const label = unit === 'mph' ? 'mph' : 'km/h';
     return {
-      summary: `${formatSpeed(kmh)} km/h`,
+      summary: `${formatSpeed(primary)} ${label}`,
       values: {
         kmh: Number(kmh.toFixed(1)),
         mph: Number(mph.toFixed(1)),
+        unit,
       },
     };
   });
@@ -49,6 +57,11 @@ export function SpeedometerScreen() {
       setTimeout(() => setActive(true), 50);
     }
   };
+
+  const primary = unit === 'mph' ? mph : kmh;
+  const primaryLabel = unit === 'mph' ? 'mph' : 'km/h';
+  const secondary = unit === 'mph' ? kmh : mph;
+  const secondaryLabel = unit === 'mph' ? 'km/h' : 'mph';
 
   return (
     <View style={styles.root}>
@@ -62,6 +75,20 @@ export function SpeedometerScreen() {
         </Pressable>
         <Text style={styles.title}>Speedometer</Text>
         <View style={styles.iconBtnPlaceholder} />
+      </View>
+
+      <View style={styles.unitRow}>
+        <SegmentControl<SpeedUnit>
+          accessibilityLabel="Speed units"
+          value={unit}
+          onChange={(next) => {
+            updatePrefs({ unit: next }).catch(() => undefined);
+          }}
+          options={[
+            { value: 'kmh', label: 'km/h' },
+            { value: 'mph', label: 'mph' },
+          ]}
+        />
       </View>
 
       {servicesOff ? (
@@ -86,12 +113,12 @@ export function SpeedometerScreen() {
         </View>
       ) : (
         <View style={styles.stage}>
-          <Text style={styles.heroSpeed}>{formatSpeed(kmh)}</Text>
-          <Text style={styles.heroUnit}>km/h</Text>
+          <Text style={styles.heroSpeed}>{formatSpeed(primary)}</Text>
+          <Text style={styles.heroUnit}>{primaryLabel}</Text>
 
           <View style={styles.secondary}>
-            <Text style={styles.secondaryValue}>{formatSpeed(mph)}</Text>
-            <Text style={styles.secondaryUnit}>mph</Text>
+            <Text style={styles.secondaryValue}>{formatSpeed(secondary)}</Text>
+            <Text style={styles.secondaryUnit}>{secondaryLabel}</Text>
           </View>
 
           {accuracyM != null ? (
@@ -103,7 +130,7 @@ export function SpeedometerScreen() {
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
           <Text style={styles.hint}>
-            Smoothed GPS speed. Accuracy is best outdoors while moving.
+            Smoothed GPS speed. Unit preference is saved for this tool only.
           </Text>
         </View>
       )}
@@ -123,7 +150,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
   iconBtn: {
     width: 44,
@@ -138,6 +165,9 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 20,
     fontWeight: '600',
+  },
+  unitRow: {
+    marginBottom: spacing.md,
   },
   centered: {
     flex: 1,
