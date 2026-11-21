@@ -45,7 +45,7 @@
       "expo-status-bar",
       "expo-screen-orientation",
       "./plugins/withEmbedDebugBundle",
-      "expo-dev-client",
+      "./plugins/withForceOfflineLaunch",
       [
         "react-native-google-mobile-ads",
         {
